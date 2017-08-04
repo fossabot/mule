@@ -14,11 +14,13 @@ import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_VALUE_PROVI
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.startIfNeeded;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
+import static org.mule.runtime.core.api.util.ExceptionUtils.tryExpecting;
 
 import org.mule.runtime.api.app.declaration.ArtifactDeclaration;
 import org.mule.runtime.api.component.ConfigurationProperties;
 import org.mule.runtime.api.component.location.Location;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.metadata.MetadataService;
 import org.mule.runtime.api.value.ValueProviderService;
@@ -34,6 +36,7 @@ import org.mule.runtime.core.api.connectivity.ConnectivityTestingService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +50,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  *
  * @since 4.0
  */
-public class LazyMuleArtifactContext extends MuleArtifactContext implements LazyComponentInitializer {
+public class LazyMuleArtifactContext extends MuleArtifactContext implements LazyComponentTaskExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LazyMuleArtifactContext.class);
 
@@ -110,16 +113,22 @@ public class LazyMuleArtifactContext extends MuleArtifactContext implements Lazy
   }
 
   @Override
-  public void initializeComponent(Location location) {
-    withContextClassLoader(muleContext.getExecutionClassLoader(), () -> {
+  public <T, E extends Exception> T withContext(Location location, Callable<T> callable) throws E {
+    return withContextClassLoader(muleContext.getExecutionClassLoader(), () -> {
       MinimalApplicationModelGenerator minimalApplicationModelGenerator =
           new MinimalApplicationModelGenerator(this.applicationModel, componentBuildingDefinitionRegistry);
+      try {
+        ApplicationModel minimalApplicationModel = minimalApplicationModelGenerator.getMinimalModel(location);
+        createComponents((DefaultListableBeanFactory) this.getBeanFactory(), minimalApplicationModel, false);
 
-      // First unregister any already initialized/started component
-      unregisterComponents(minimalApplicationModelGenerator.resolveComponentModelDependencies());
-
-      ApplicationModel minimalApplicationModel = minimalApplicationModelGenerator.getMinimalModel(location);
-      createComponents((DefaultListableBeanFactory) this.getBeanFactory(), minimalApplicationModel, false);
+        return tryExpecting(RuntimeException.class, callable, e -> {
+          throw new MuleRuntimeException(e);
+        });
+      } finally {
+        if (minimalApplicationModelGenerator != null) {
+          unregisterComponents(minimalApplicationModelGenerator.resolveComponentModelDependencies());
+        }
+      }
     });
   }
 

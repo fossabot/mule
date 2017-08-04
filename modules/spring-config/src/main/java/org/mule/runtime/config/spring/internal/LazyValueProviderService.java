@@ -7,8 +7,6 @@
 package org.mule.runtime.config.spring.internal;
 
 import static java.lang.String.format;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.mule.runtime.api.exception.ExceptionHelper.getRootException;
 import static org.mule.runtime.api.value.ResolvingFailure.Builder.newFailure;
 import static org.mule.runtime.api.value.ValueResult.resultFrom;
@@ -16,14 +14,11 @@ import static org.mule.runtime.core.internal.value.MuleValueProviderServiceUtili
 import static org.mule.runtime.core.internal.value.MuleValueProviderServiceUtility.isConnection;
 import static org.mule.runtime.extension.api.values.ValueResolvingException.INVALID_LOCATION;
 import static org.mule.runtime.extension.api.values.ValueResolvingException.UNKNOWN;
-
 import org.mule.runtime.api.component.location.Location;
 import org.mule.runtime.api.value.ValueProviderService;
 import org.mule.runtime.api.value.ValueResult;
 import org.mule.runtime.config.spring.internal.dsl.model.NoSuchComponentModelException;
 import org.mule.runtime.core.internal.value.MuleValueProviderService;
-
-import java.util.Optional;
 
 /**
  * {@link ValueProviderService} implementation flavour that initialises just the required components before executing the
@@ -37,11 +32,12 @@ import java.util.Optional;
  */
 public class LazyValueProviderService implements ValueProviderService {
 
-  private LazyMuleArtifactContext lazyMuleArtifactContext;
+  private LazyComponentTaskExecutor lazyComponentTaskExecutor;
   private ValueProviderService providerService;
 
-  LazyValueProviderService(LazyMuleArtifactContext artifactContext, MuleValueProviderService providerServiceDelegate) {
-    this.lazyMuleArtifactContext = artifactContext;
+  LazyValueProviderService(LazyComponentTaskExecutor lazyComponentTaskExecutor,
+                           MuleValueProviderService providerServiceDelegate) {
+    this.lazyComponentTaskExecutor = lazyComponentTaskExecutor;
     this.providerService = providerServiceDelegate;
   }
 
@@ -50,29 +46,25 @@ public class LazyValueProviderService implements ValueProviderService {
    */
   @Override
   public ValueResult getValues(Location location, String providerName) {
-    return initializeComponent(locationWithOutConnection(location))
-        .orElseGet(() -> providerService.getValues(location, providerName));
-  }
-
-  private Optional<ValueResult> initializeComponent(Location location) {
     try {
-      lazyMuleArtifactContext.initializeComponent(location);
+      return lazyComponentTaskExecutor.withContext(locationWithOutConnection(location),
+                                                   () -> providerService.getValues(location, providerName));
     } catch (Exception e) {
       Throwable rootException = getRootException(e);
       if (rootException instanceof NoSuchComponentModelException) {
-        return of(resultFrom(newFailure(e)
+        return resultFrom(newFailure(e)
             .withFailureCode(INVALID_LOCATION)
             .withMessage(format("Unable to resolve values. No component was found in the given location [%s]", location))
-            .build()));
+            .build());
       }
 
-      return of(resultFrom(newFailure(e)
+      return resultFrom(newFailure(e)
           .withMessage("Unknown error occurred trying to resolve values. " + e.getMessage())
           .withFailureCode(UNKNOWN)
-          .build()));
+          .build());
     }
-    return empty();
   }
+
 
   private Location locationWithOutConnection(Location location) {
     return isConnection(location) ? deleteLastPartFromLocation(location) : location;

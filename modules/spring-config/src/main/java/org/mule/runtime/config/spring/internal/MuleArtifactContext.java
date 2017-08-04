@@ -32,11 +32,9 @@ import static org.mule.runtime.internal.dsl.DslConstants.CORE_PREFIX;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME;
 import static org.springframework.context.annotation.AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME;
-
 import org.mule.runtime.api.app.declaration.ArtifactDeclaration;
 import org.mule.runtime.api.component.ComponentIdentifier;
 import org.mule.runtime.api.component.ConfigurationProperties;
-import org.mule.runtime.api.component.location.Location;
 import org.mule.runtime.api.dsl.DslResolvingContext;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.ioc.ConfigurableObjectProvider;
@@ -57,7 +55,6 @@ import org.mule.runtime.config.spring.api.dsl.processor.SimpleConfigAttribute;
 import org.mule.runtime.config.spring.api.dsl.processor.xml.XmlApplicationParser;
 import org.mule.runtime.config.spring.api.dsl.processor.xml.XmlApplicationServiceRegistry;
 import org.mule.runtime.config.spring.internal.dsl.model.ClassLoaderResourceProvider;
-import org.mule.runtime.config.spring.internal.dsl.model.MinimalApplicationModelGenerator;
 import org.mule.runtime.config.spring.internal.dsl.model.SpringComponentModel;
 import org.mule.runtime.config.spring.internal.dsl.model.config.DefaultConfigurationPropertiesResolver;
 import org.mule.runtime.config.spring.internal.dsl.model.config.SystemPropertiesConfigurationProvider;
@@ -604,13 +601,6 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext {
 
   public OptionalObjectsController getOptionalObjectsController() {
     return optionalObjectsController;
-  }
-
-  public void initializeComponent(Location location) {
-    MinimalApplicationModelGenerator minimalApplicationModelGenerator =
-        new MinimalApplicationModelGenerator(this.applicationModel, componentBuildingDefinitionRegistry);
-    ApplicationModel minimalApplicationModel = minimalApplicationModelGenerator.getMinimalModel(location);
-    createApplicationComponents((DefaultListableBeanFactory) this.getBeanFactory(), minimalApplicationModel, false);
   }
 
   public ConnectivityTestingService getConnectivityTestingService() {
