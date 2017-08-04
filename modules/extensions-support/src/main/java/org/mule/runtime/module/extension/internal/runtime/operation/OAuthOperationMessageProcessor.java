@@ -11,13 +11,12 @@ import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.util.ExceptionUtils.extractCauseOfType;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.exception.MuleRuntimeException;
-import org.mule.runtime.api.meta.TargetType;
 import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.api.meta.model.operation.OperationModel;
 import org.mule.runtime.core.api.InternalEvent;
 import org.mule.runtime.core.api.extension.ExtensionManager;
-import org.mule.runtime.core.internal.policy.PolicyManager;
 import org.mule.runtime.core.api.streaming.CursorProviderFactory;
+import org.mule.runtime.core.internal.policy.PolicyManager;
 import org.mule.runtime.extension.api.connectivity.oauth.AccessTokenExpiredException;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationProvider;
@@ -54,13 +53,13 @@ public class OAuthOperationMessageProcessor extends OperationMessageProcessor {
                                         OperationModel operationModel,
                                         ConfigurationProvider configurationProvider,
                                         String target,
-                                        TargetType targetType,
+                                        String targetValue,
                                         ResolverSet resolverSet,
                                         CursorProviderFactory cursorProviderFactory,
                                         ExtensionManager extensionManager,
                                         PolicyManager policyManager,
                                         ExtensionsOAuthManager oauthManager) {
-    super(extensionModel, operationModel, configurationProvider, target, targetType, resolverSet, cursorProviderFactory,
+    super(extensionModel, operationModel, configurationProvider, target, targetValue, resolverSet, cursorProviderFactory,
           extensionManager,
           policyManager);
     this.oauthManager = oauthManager;
