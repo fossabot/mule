@@ -13,7 +13,6 @@ import static org.hamcrest.core.Is.is;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getServiceFolder;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getServicesFolder;
 import static org.mule.runtime.core.api.util.FileUtils.unzip;
-import static org.mule.runtime.module.service.ServiceDescriptorFactory.SERVICE_PROVIDER_CLASS_NAME;
 import org.mule.runtime.core.api.config.MuleProperties;
 import org.mule.runtime.module.service.builder.ServiceFileBuilder;
 import org.mule.tck.junit4.AbstractMuleTestCase;
@@ -39,7 +38,7 @@ public class ServiceDescriptorFactoryTestCase extends AbstractMuleTestCase {
     assertThat(servicesFolder.mkdirs(), is(true));
 
     final ServiceFileBuilder fooService =
-        new ServiceFileBuilder(SERVICE_NAME).configuredWith(SERVICE_PROVIDER_CLASS_NAME, PROVIDER_CLASS_NAME);
+        new ServiceFileBuilder(SERVICE_NAME).withServiceProviderClass(PROVIDER_CLASS_NAME);
     unzip(fooService.getArtifactFile(), getServiceFolder(SERVICE_NAME));
 
     ServiceDescriptor descriptor = serviceDescriptorFactory.create(getServiceFolder(SERVICE_NAME));

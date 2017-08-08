@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getServicesFolder;
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_HOME_DIRECTORY_PROPERTY;
-import static org.mule.runtime.module.service.ServiceDescriptorFactory.SERVICE_PROVIDER_CLASS_NAME;
 import org.mule.runtime.api.service.ServiceDefinition;
 import org.mule.runtime.api.service.ServiceProvider;
 import org.mule.runtime.core.api.util.Pair;
@@ -112,7 +111,7 @@ public class FileSystemServiceProviderDiscovererTestCase extends AbstractMuleTes
   private void installService(String serviceName, Class<? extends ServiceProvider> providerClass, boolean corrupted)
       throws Exception {
     final ServiceFileBuilder fooService =
-        new ServiceFileBuilder(serviceName).configuredWith(SERVICE_PROVIDER_CLASS_NAME, providerClass.getName());
+        new ServiceFileBuilder(serviceName).withServiceProviderClass(providerClass.getName());
     if (corrupted) {
       fooService.corrupted();
     }

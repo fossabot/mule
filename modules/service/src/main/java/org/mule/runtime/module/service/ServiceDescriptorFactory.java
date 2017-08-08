@@ -60,10 +60,11 @@ public class ServiceDescriptorFactory implements ArtifactDescriptorFactory<Servi
     if (!artifactJsonFile.exists()) {
       throw new IllegalStateException("Artifact descriptor does not exists: " + artifactJsonFile);
     }
-    ServiceDescriptor artifactDescriptor = loadFromJsonDescriptor(artifactFolder, artifactJsonFile);
-    // TODO(pablo.kraan): deployment - create the descriptor from the json file
 
-    throw new ArtifactDescriptorCreateException("Service must contain a " + SERVICE_PROPERTIES + " file");
+    ServiceDescriptor serviceDescriptor = loadFromJsonDescriptor(artifactFolder, artifactJsonFile);
+    serviceDescriptor.setRootFolder(artifactFolder);
+
+    return serviceDescriptor;
   }
 
   private ServiceDescriptor loadFromJsonDescriptor(File artifactFolder, File artifactJsonDescriptor) {

@@ -8,11 +8,17 @@
 package org.mule.runtime.module.service.builder;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mule.runtime.core.api.util.StringUtils.isBlank;
 import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.REPOSITORY_FOLDER;
-import static org.mule.runtime.module.service.ServiceDescriptor.SERVICE_PROPERTIES;
-import org.mule.runtime.core.api.util.StringUtils;
+import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.MAVEN;
+import static org.mule.runtime.module.artifact.descriptor.ArtifactDescriptor.MULE_ARTIFACT_JSON_DESCRIPTOR_LOCATION;
+import org.mule.runtime.api.deployment.meta.MuleArtifactLoaderDescriptor;
+import org.mule.runtime.api.deployment.meta.MuleServiceModel.MuleServiceModelBuilder;
+import org.mule.runtime.api.deployment.persistence.MuleServiceModelJsonSerializer;
+import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.module.artifact.builder.AbstractArtifactFileBuilder;
 import org.mule.runtime.module.artifact.builder.AbstractDependencyFileBuilder;
 import org.mule.tck.ZipUtils;
@@ -21,6 +27,8 @@ import org.mule.tools.api.classloader.model.ClassLoaderModel;
 import org.mule.tools.api.packager.ContentGenerator;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -44,6 +52,7 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
   private Properties properties = new Properties();
   // TODO(pablo.kraan): deployment - need lightway package?
   private boolean useHeavyPackage = true;
+  private String serviceProviderClassName;
 
   /**
    * Creates a new builder
@@ -85,46 +94,22 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
   }
 
   /**
-   * Adds a property into the service properties file.
+   * Configures the service provider
    *
-   * @param propertyName name fo the property to add. Non empty
-   * @param propertyValue value of the property to add. Non null.
+   * @param className service provider class name. Non blank.
    * @return the same builder instance
    */
-  public ServiceFileBuilder configuredWith(String propertyName, String propertyValue) {
+  public ServiceFileBuilder withServiceProviderClass(String className) {
     checkImmutable();
-    checkArgument(!StringUtils.isEmpty(propertyName), "Property name cannot be empty");
-    checkArgument(propertyValue != null, "Property value cannot be null");
-    properties.put(propertyName, propertyValue);
+    checkArgument(!isBlank(className), "Property value cannot be blank");
+    serviceProviderClassName = className;
+
     return this;
   }
-
-  //@Override
-  //protected List<ZipUtils.ZipResource> getCustomResources() {
-  //  final List<ZipUtils.ZipResource> customResources = new LinkedList<>();
-  //
-  //  if (!properties.isEmpty()) {
-  //    final File applicationPropertiesFile = new File(getTempFolder(), SERVICE_PROPERTIES);
-  //    applicationPropertiesFile.deleteOnExit();
-  //    createPropertiesFile(applicationPropertiesFile, properties);
-  //
-  //    customResources.add(new ZipUtils.ZipResource(applicationPropertiesFile.getAbsolutePath(), SERVICE_PROPERTIES));
-  //  }
-  //
-  //  return customResources;
-  //}
 
   @Override
   protected final List<ZipUtils.ZipResource> getCustomResources() {
     final List<ZipUtils.ZipResource> customResources = new LinkedList<>();
-
-      if (!properties.isEmpty()) {
-        final File applicationPropertiesFile = new File(getTempFolder(), SERVICE_PROPERTIES);
-        applicationPropertiesFile.deleteOnExit();
-        createPropertiesFile(applicationPropertiesFile, properties);
-
-        customResources.add(new ZipUtils.ZipResource(applicationPropertiesFile.getAbsolutePath(), SERVICE_PROPERTIES));
-      }
 
     for (AbstractDependencyFileBuilder dependencyFileBuilder : getAllCompileDependencies()) {
       customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactFile().getAbsolutePath(),
@@ -148,14 +133,41 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
       }
     }
 
-    //customResources.addAll(doGetCustomResources());
-
     if (useHeavyPackage) {
       customResources.add(new ZipUtils.ZipResource(getClassLoaderModelFile().getAbsolutePath(),
                                                    CLASSLOADER_MODEL_JSON_DESCRIPTOR_LOCATION));
     }
 
+    File serviceDescriptor = createServiceJsonDescriptorFile();
+    customResources.add(new ZipUtils.ZipResource(serviceDescriptor.getAbsolutePath(), MULE_ARTIFACT_JSON_DESCRIPTOR_LOCATION));
+
     return customResources;
+  }
+
+  private File createServiceJsonDescriptorFile() {
+    File serviceDescriptor = new File(getTempFolder(), getArtifactId() + "service.json");
+    serviceDescriptor.deleteOnExit();
+    MuleServiceModelBuilder serviceModelBuilder = new MuleServiceModelBuilder();
+    serviceModelBuilder.setName(getArtifactId()).setMinMuleVersion("4.0.0");
+    //domain.ifPresent(serviceModelBuilder::setDomain);
+    //redeploymentEnabled.ifPresent(serviceModelBuilder::setRedeploymentEnabled);
+    //configResources.ifPresent(configs -> {
+    //  String[] configFiles = configs.split(",");
+    //  serviceModelBuilder.setConfigs(asList(configFiles));
+    //});
+    serviceModelBuilder.withClassLoaderModelDescriber().setId(MAVEN);
+    //exportedResources.ifPresent(resources -> {
+    //  serviceModelBuilder.withClassLoaderModelDescriber().addProperty(EXPORTED_RESOURCES, resources.split(","));
+    //});
+    serviceModelBuilder.withBundleDescriptorLoader(new MuleArtifactLoaderDescriptor(MAVEN, emptyMap()));
+    serviceModelBuilder.withServiceProviderClassName(serviceProviderClassName);
+    String serviceDescriptorContent = new MuleServiceModelJsonSerializer().serialize(serviceModelBuilder.build());
+    try (FileWriter fileWriter = new FileWriter(serviceDescriptor)) {
+      fileWriter.write(serviceDescriptorContent);
+    } catch (IOException e) {
+      throw new MuleRuntimeException(e);
+    }
+    return serviceDescriptor;
   }
 
   private File createClassLoaderModelJsonFile(AbstractDependencyFileBuilder dependencyFileBuilder) {
