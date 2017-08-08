@@ -70,7 +70,7 @@ public abstract class AbstractDeployableDescriptorFactory<M extends MuleDeployab
 
   protected abstract String getDescriptorFileName();
 
-  protected T loadFromJsonDescriptor(File artifactFolder, File artifactJsonDescriptor) {
+  private T loadFromJsonDescriptor(File artifactFolder, File artifactJsonDescriptor) {
     final M artifactModel = getArtifactJsonDescriber(artifactJsonDescriptor);
 
     final T descriptor = createArtifactDescriptor(artifactFolder.getName());
@@ -192,7 +192,7 @@ public abstract class AbstractDeployableDescriptorFactory<M extends MuleDeployab
     return pluginDescriptors;
   }
 
-  protected M getArtifactJsonDescriber(File jsonFile) {
+  private M getArtifactJsonDescriber(File jsonFile) {
     try (InputStream stream = new FileInputStream(jsonFile)) {
       return deserializeArtifactModel(stream);
     } catch (IOException e) {

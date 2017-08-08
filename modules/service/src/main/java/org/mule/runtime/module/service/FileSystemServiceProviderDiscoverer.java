@@ -58,6 +58,16 @@ public class FileSystemServiceProviderDiscoverer implements ServiceProviderDisco
 
     final List<ServiceDescriptor> serviceDescriptors = new LinkedList<>();
 
+    // TODO(pablo.kraan): MULE-13281 - remove ZIP file support once all the services are migrated to the new file format
+    serviceDescriptors.addAll(getLegacyServiceDescriptors(serviceDescriptorFactory));
+    serviceDescriptors.addAll(getServiceDescriptors(serviceDescriptorFactory));
+
+    return createServiceProviders(serviceDescriptors, serviceClassLoaderFactory);
+  }
+
+  private List<ServiceDescriptor> getLegacyServiceDescriptors(ServiceDescriptorFactory serviceDescriptorFactory)
+    throws ServiceResolutionError {
+    List<ServiceDescriptor> foundServices = new LinkedList<>();
     for (String serviceFile : getServicesFolder().list(new SuffixFileFilter(".zip"))) {
       final File tempFolder = new File(getServicesTempFolder(), getBaseName(serviceFile));
       try {
@@ -67,10 +77,26 @@ public class FileSystemServiceProviderDiscoverer implements ServiceProviderDisco
       }
 
       final ServiceDescriptor serviceDescriptor = serviceDescriptorFactory.create(tempFolder);
-      serviceDescriptors.add(serviceDescriptor);
+      foundServices.add(serviceDescriptor);
     }
+    return foundServices;
+  }
 
-    return createServiceProviders(serviceDescriptors, serviceClassLoaderFactory);
+  private List<ServiceDescriptor> getServiceDescriptors(ServiceDescriptorFactory serviceDescriptorFactory)
+    throws ServiceResolutionError {
+    List<ServiceDescriptor> foundServices = new LinkedList<>();
+    for (String serviceFile : getServicesFolder().list(new SuffixFileFilter(".jar"))) {
+      final File tempFolder = new File(getServicesTempFolder(), getBaseName(serviceFile));
+      try {
+        unzip(new File(getServicesFolder(), serviceFile), tempFolder);
+      } catch (IOException e) {
+        throw new ServiceResolutionError("Error processing service JAR file", e);
+      }
+
+      final ServiceDescriptor serviceDescriptor = serviceDescriptorFactory.create(tempFolder);
+      foundServices.add(serviceDescriptor);
+    }
+    return foundServices;
   }
 
   private List<Pair<ArtifactClassLoader, ServiceProvider>> createServiceProviders(List<ServiceDescriptor> serviceDescriptors,

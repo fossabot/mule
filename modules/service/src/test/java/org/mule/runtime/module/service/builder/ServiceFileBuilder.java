@@ -8,12 +8,21 @@
 package org.mule.runtime.module.service.builder;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.REPOSITORY_FOLDER;
 import static org.mule.runtime.module.service.ServiceDescriptor.SERVICE_PROPERTIES;
 import org.mule.runtime.core.api.util.StringUtils;
 import org.mule.runtime.module.artifact.builder.AbstractArtifactFileBuilder;
+import org.mule.runtime.module.artifact.builder.AbstractDependencyFileBuilder;
 import org.mule.tck.ZipUtils;
+import org.mule.tools.api.classloader.model.ArtifactCoordinates;
+import org.mule.tools.api.classloader.model.ClassLoaderModel;
+import org.mule.tools.api.packager.ContentGenerator;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -23,7 +32,18 @@ import java.util.Properties;
  */
 public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileBuilder> {
 
+
+  // TODO(pablo.kraan): deployment - clean up
+  private static final String META_INF = "META-INF";
+  public static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR = "classloader-model.json";
+  public static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR_LOCATION =
+    Paths.get("META-INF", "mule-artifact", CLASSLOADER_MODEL_JSON_DESCRIPTOR).toString();
+  public static final String MULE_PLUGIN_CLASSIFIER = "mule-plugin";
+  public static final String EXTENSION_BUNDLE_TYPE = "jar";
+  public static final String MULE_ARTIFACT = "mule-artifact";
   private Properties properties = new Properties();
+  // TODO(pablo.kraan): deployment - need lightway package?
+  private boolean useHeavyPackage = true;
 
   /**
    * Creates a new builder
@@ -79,19 +99,116 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
     return this;
   }
 
+  //@Override
+  //protected List<ZipUtils.ZipResource> getCustomResources() {
+  //  final List<ZipUtils.ZipResource> customResources = new LinkedList<>();
+  //
+  //  if (!properties.isEmpty()) {
+  //    final File applicationPropertiesFile = new File(getTempFolder(), SERVICE_PROPERTIES);
+  //    applicationPropertiesFile.deleteOnExit();
+  //    createPropertiesFile(applicationPropertiesFile, properties);
+  //
+  //    customResources.add(new ZipUtils.ZipResource(applicationPropertiesFile.getAbsolutePath(), SERVICE_PROPERTIES));
+  //  }
+  //
+  //  return customResources;
+  //}
+
   @Override
-  protected List<ZipUtils.ZipResource> getCustomResources() {
+  protected final List<ZipUtils.ZipResource> getCustomResources() {
     final List<ZipUtils.ZipResource> customResources = new LinkedList<>();
 
-    if (!properties.isEmpty()) {
-      final File applicationPropertiesFile = new File(getTempFolder(), SERVICE_PROPERTIES);
-      applicationPropertiesFile.deleteOnExit();
-      createPropertiesFile(applicationPropertiesFile, properties);
+      if (!properties.isEmpty()) {
+        final File applicationPropertiesFile = new File(getTempFolder(), SERVICE_PROPERTIES);
+        applicationPropertiesFile.deleteOnExit();
+        createPropertiesFile(applicationPropertiesFile, properties);
 
-      customResources.add(new ZipUtils.ZipResource(applicationPropertiesFile.getAbsolutePath(), SERVICE_PROPERTIES));
+        customResources.add(new ZipUtils.ZipResource(applicationPropertiesFile.getAbsolutePath(), SERVICE_PROPERTIES));
+      }
+
+    for (AbstractDependencyFileBuilder dependencyFileBuilder : getAllCompileDependencies()) {
+      customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactFile().getAbsolutePath(),
+                                                   Paths.get(REPOSITORY_FOLDER,
+                                                             dependencyFileBuilder.getArtifactFileRepositoryPath())
+                                                     .toString()));
+
+      // TODO(pablo.kraan): deployment - remove plugins from here
+      if (useHeavyPackage && MULE_PLUGIN_CLASSIFIER.equals(dependencyFileBuilder.getClassifier())) {
+        File pluginClassLoaderModel = createClassLoaderModelJsonFile(dependencyFileBuilder);
+        customResources.add(new ZipUtils.ZipResource(pluginClassLoaderModel.getAbsolutePath(),
+                                                     Paths.get(REPOSITORY_FOLDER,
+                                                               dependencyFileBuilder.getArtifactFileRepositoryFolderPath(),
+                                                               CLASSLOADER_MODEL_JSON_DESCRIPTOR)
+                                                       .toString()));
+      } else {
+        customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactPomFile().getAbsolutePath(),
+                                                     Paths.get(REPOSITORY_FOLDER,
+                                                               dependencyFileBuilder.getArtifactFilePomRepositoryPath())
+                                                       .toString()));
+      }
+    }
+
+    //customResources.addAll(doGetCustomResources());
+
+    if (useHeavyPackage) {
+      customResources.add(new ZipUtils.ZipResource(getClassLoaderModelFile().getAbsolutePath(),
+                                                   CLASSLOADER_MODEL_JSON_DESCRIPTOR_LOCATION));
     }
 
     return customResources;
+  }
+
+  private File createClassLoaderModelJsonFile(AbstractDependencyFileBuilder dependencyFileBuilder) {
+    ArtifactCoordinates artifactCoordinates =
+      new ArtifactCoordinates(dependencyFileBuilder.getGroupId(), dependencyFileBuilder.getArtifactId(),
+                              dependencyFileBuilder.getVersion(), dependencyFileBuilder.getType(),
+                              dependencyFileBuilder.getClassifier());
+    ClassLoaderModel classLoaderModel = new ClassLoaderModel("1.0", artifactCoordinates);
+
+    List<org.mule.tools.api.classloader.model.Artifact> artifactDependencies = new LinkedList<>();
+    List<AbstractDependencyFileBuilder> dependencies = dependencyFileBuilder.getDependencies();
+    for (AbstractDependencyFileBuilder fileBuilderDependency : dependencies) {
+      artifactDependencies.add(getArtifact(fileBuilderDependency));
+    }
+
+    classLoaderModel.setDependencies(artifactDependencies);
+
+    Path repository = Paths.get(getTempFolder(), REPOSITORY_FOLDER, dependencyFileBuilder.getArtifactFileRepositoryFolderPath());
+    if (repository.toFile().exists()) {
+      repository.toFile().delete();
+    } else {
+      if (!repository.toFile().mkdirs()) {
+        throw new IllegalStateException("Cannot create artifact folder inside repository");
+      }
+    }
+
+    return ContentGenerator.createClassLoaderModelJsonFile(classLoaderModel, repository.toFile());
+  }
+
+  private File getClassLoaderModelFile() {
+    ArtifactCoordinates artifactCoordinates = new ArtifactCoordinates(getGroupId(), getArtifactId(), getVersion());
+    ClassLoaderModel classLoaderModel = new ClassLoaderModel("1.0", artifactCoordinates);
+
+    List<org.mule.tools.api.classloader.model.Artifact> artifactDependencies = new LinkedList<>();
+    for (AbstractDependencyFileBuilder fileBuilderDependency : getDependencies()) {
+      artifactDependencies.add(getArtifact(fileBuilderDependency));
+    }
+
+    classLoaderModel.setDependencies(artifactDependencies);
+
+    File destinationFolder = Paths.get(getTempFolder()).resolve(META_INF).resolve(MULE_ARTIFACT).toFile();
+
+    if (!destinationFolder.exists()) {
+      assertThat(destinationFolder.mkdirs(), is(true));
+    }
+    return ContentGenerator.createClassLoaderModelJsonFile(classLoaderModel, destinationFolder);
+  }
+
+  private org.mule.tools.api.classloader.model.Artifact getArtifact(AbstractDependencyFileBuilder builder) {
+    ArtifactCoordinates artifactCoordinates =
+      new ArtifactCoordinates(builder.getGroupId(), builder.getArtifactId(), builder.getVersion(), builder.getType(),
+                              builder.getClassifier());
+    return new org.mule.tools.api.classloader.model.Artifact(artifactCoordinates, builder.getArtifactFile().toURI());
   }
 
   @Override

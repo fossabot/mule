@@ -53,6 +53,7 @@ public class ApplicationDescriptorFactory
       descriptor.setDomain(domain);
     });
 
+    // TODO(pablo.kraan): deployment - looks like this line is not needed
     File appClassesFolder = getAppClassesFolder(descriptor);
   }
 
