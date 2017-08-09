@@ -57,10 +57,10 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
     try {
       poolingListener.onReturn(connection);
 
-      returnAttempted = true;
       pool.returnObject(connection);
+      returnAttempted = true;
     } catch (Exception e) {
-      LOGGER.warn("Could not return connection to the pool. Connection has been destroyed", e);
+      LOGGER.warn("Could not return connection to the pool. Connection will be destroyed", e);
     } finally {
       if (!returnAttempted) {
         try {

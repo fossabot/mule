@@ -74,10 +74,10 @@ final class PoolingConnectionManagementStrategy<C> extends ConnectionManagementS
         pool.invalidateObject(connection);
         throw new ConnectionException(NULL_VALIDATION_RESULT_ERROR_MESSAGE);
       } else if (!validationResult.isValid()) {
-        pool.invalidateObject(connection);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Error validating connection: {}. Invalidating connection.", validationResult.getMessage());
         }
+        pool.invalidateObject(connection);
         throw new ConnectionException(validationResult.getMessage(), validationResult.getException());
       }
 
@@ -85,9 +85,9 @@ final class PoolingConnectionManagementStrategy<C> extends ConnectionManagementS
     } catch (ConnectionException e) {
       throw e;
     } catch (NoSuchElementException e) {
-      throw new ConnectionException("Connection pool is exhausted");
+      throw new ConnectionException("Connection pool is exhausted", e);
     } catch (Exception e) {
-      throw new ConnectionException("An exception was found trying to obtain a connection", e);
+      throw new ConnectionException("An exception was found trying to obtain a connection: " + e.getMessage(), e);
     }
   }
 
