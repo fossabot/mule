@@ -112,7 +112,6 @@ public class OAuthConnectionProviderObjectBuilder<C> extends DefaultConnectionPr
                                                     config,
                                                     getCallbackValues(),
                                                     oauthManager,
-                                                    disableValidation,
                                                     retryPolicyTemplate);
     return provider;
   }
