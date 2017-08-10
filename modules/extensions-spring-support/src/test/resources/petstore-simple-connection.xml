@@ -26,7 +26,7 @@
     </petstore:config>
 
     <petstore:config name="petstoreInvalidConnectionWithDisabledValidation" cashierName="jim">
-        <petstore:pooled-connection disableValidation="true" username="john" password="invalid-password" />
+        <petstore:pooled-connection username="john" password="invalid-password" />
         <petstore:pets>
             <petstore:pet value="Lassie" />
             <petstore:pet value="Sapo Pepe" />

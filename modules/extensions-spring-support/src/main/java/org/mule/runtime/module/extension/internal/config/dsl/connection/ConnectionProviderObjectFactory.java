@@ -45,7 +45,6 @@ public class ConnectionProviderObjectFactory extends AbstractExtensionObjectFact
 
   private PoolingProfile poolingProfile = null;
   private RetryPolicyTemplate retryPolicyTemplate = null;
-  private boolean disableValidation = false;
 
   @Inject
   private MuleContext muleContext;
@@ -70,17 +69,17 @@ public class ConnectionProviderObjectFactory extends AbstractExtensionObjectFact
     ConnectionProviderObjectBuilder builder;
     if (extensionModel.getModelProperty(SoapExtensionModelProperty.class).isPresent()) {
       builder = new SoapConnectionProviderObjectBuilder(providerModel, resolverSet, poolingProfile,
-                                                        disableValidation, retryPolicyTemplate,
+                                                        retryPolicyTemplate,
                                                         connectionManager, extensionModel,
                                                         muleContext);
     } else if (providerModel.getModelProperty(OAuthModelProperty.class).isPresent()) {
       builder = new OAuthConnectionProviderObjectBuilder(providerModel, resolverSet, poolingProfile,
-                                                         disableValidation, retryPolicyTemplate,
+                                                         retryPolicyTemplate,
                                                          oauthManager, connectionManager, extensionModel,
                                                          muleContext);
     } else {
       builder = new DefaultConnectionProviderObjectBuilder(providerModel, resolverSet, poolingProfile,
-                                                           disableValidation, retryPolicyTemplate,
+                                                           retryPolicyTemplate,
                                                            connectionManager, extensionModel,
                                                            muleContext);
     }
@@ -103,9 +102,4 @@ public class ConnectionProviderObjectFactory extends AbstractExtensionObjectFact
   public void setRetryPolicyTemplate(RetryPolicyTemplate retryPolicyTemplate) {
     this.retryPolicyTemplate = retryPolicyTemplate;
   }
-
-  public void setDisableValidation(boolean disableValidation) {
-    this.disableValidation = disableValidation;
-  }
-
 }

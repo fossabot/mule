@@ -48,9 +48,8 @@ public class OAuthConnectionProviderWrapper<C> extends ReconnectableConnectionPr
                                         OAuthConfig oauthConfig,
                                         Map<Field, String> callbackValues,
                                         ExtensionsOAuthManager oauthManager,
-                                        boolean disableValidation,
                                         RetryPolicyTemplate retryPolicyTemplate) {
-    super(delegate, disableValidation, retryPolicyTemplate);
+    super(delegate, retryPolicyTemplate);
     this.oauthConfig = oauthConfig;
     this.oauthManager = oauthManager;
     authCodeStateSetter = getAuthCodeStateSetter(delegate);

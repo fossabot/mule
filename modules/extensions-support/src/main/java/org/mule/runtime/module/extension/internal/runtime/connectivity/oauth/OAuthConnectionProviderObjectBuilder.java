@@ -79,13 +79,12 @@ public class OAuthConnectionProviderObjectBuilder<C> extends DefaultConnectionPr
   public OAuthConnectionProviderObjectBuilder(ConnectionProviderModel providerModel,
                                               ResolverSet resolverSet,
                                               PoolingProfile poolingProfile,
-                                              boolean disableValidation,
                                               RetryPolicyTemplate retryPolicyTemplate,
                                               ExtensionsOAuthManager oauthManager,
                                               ConnectionManagerAdapter connectionManager,
                                               ExtensionModel extensionModel,
                                               MuleContext muleContext) {
-    super(providerModel, resolverSet, poolingProfile, disableValidation, retryPolicyTemplate, connectionManager, extensionModel,
+    super(providerModel, resolverSet, poolingProfile, retryPolicyTemplate, connectionManager, extensionModel,
           muleContext);
     this.oauthManager = oauthManager;
     grantType = getGrantType();
@@ -135,7 +134,6 @@ public class OAuthConnectionProviderObjectBuilder<C> extends DefaultConnectionPr
                                                     config,
                                                     getCallbackValues(),
                                                     oauthManager,
-                                                    disableValidation,
                                                     retryPolicyTemplate);
     return new Pair<>(provider, result);
   }

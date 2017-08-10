@@ -31,9 +31,10 @@ public final class PoolingConnectionProviderWrapper<C> extends ReconnectableConn
    * @param retryPolicyTemplate a {@link AbstractPolicyTemplate} which will hold the retry policy configured in the Mule
    *        Application
    */
-  public PoolingConnectionProviderWrapper(ConnectionProvider<C> delegate, PoolingProfile poolingProfile,
-                                          boolean disableValidation, RetryPolicyTemplate retryPolicyTemplate) {
-    super(delegate, disableValidation, retryPolicyTemplate);
+  public PoolingConnectionProviderWrapper(ConnectionProvider<C> delegate,
+                                          PoolingProfile poolingProfile,
+                                          RetryPolicyTemplate retryPolicyTemplate) {
+    super(delegate, retryPolicyTemplate);
     this.poolingProfile = poolingProfile;
   }
 

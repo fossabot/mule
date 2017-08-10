@@ -48,12 +48,15 @@ public final class SoapConnectionProviderObjectBuilder extends ConnectionProvide
    * @param connectionManager a {@link ConnectionManagerAdapter} to obtain the default {@link RetryPolicyTemplate} in case of none
    *                          is provided
    */
-  public SoapConnectionProviderObjectBuilder(ConnectionProviderModel providerModel, ResolverSet resolverSet,
-                                             PoolingProfile poolingProfile, boolean disableValidation,
-                                             RetryPolicyTemplate retryPolicyTemplate, ConnectionManagerAdapter connectionManager,
-                                             ExtensionModel extensionModel, MuleContext muleContext) {
+  public SoapConnectionProviderObjectBuilder(ConnectionProviderModel providerModel,
+                                             ResolverSet resolverSet,
+                                             PoolingProfile poolingProfile,
+                                             RetryPolicyTemplate retryPolicyTemplate,
+                                             ConnectionManagerAdapter connectionManager,
+                                             ExtensionModel extensionModel,
+                                             MuleContext muleContext) {
     super(providerModel, getServiceProviderType(providerModel), resolverSet, poolingProfile,
-          disableValidation, retryPolicyTemplate, connectionManager, extensionModel, muleContext);
+          retryPolicyTemplate, connectionManager, extensionModel, muleContext);
     objectBuilder = new DefaultResolverSetBasedObjectBuilder<>(getServiceProviderType(providerModel), resolverSet);
   }
 
@@ -70,7 +73,7 @@ public final class SoapConnectionProviderObjectBuilder extends ConnectionProvide
     MessageDispatcherProvider<? extends MessageDispatcher> transport = getCustomTransport(result);
     ConnectionProvider<ForwardingSoapClient> provider =
         new ForwardingSoapClientConnectionProvider(serviceProvider, transport, muleContext);
-    provider = new ReconnectableConnectionProviderWrapper<>(provider, disableValidation, retryPolicyTemplate);
+    provider = new ReconnectableConnectionProviderWrapper<>(provider, retryPolicyTemplate);
     provider = new ErrorTypeHandlerConnectionProviderWrapper<>(provider, muleContext, extensionModel, retryPolicyTemplate);
     return new Pair(provider, result);
   }

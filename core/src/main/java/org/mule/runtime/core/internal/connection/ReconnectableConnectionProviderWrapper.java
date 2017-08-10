@@ -21,37 +21,27 @@ import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
  */
 public class ReconnectableConnectionProviderWrapper<C> extends ConnectionProviderWrapper<C> {
 
-  private final boolean disableValidation;
   private final RetryPolicyTemplate retryPolicyTemplate;
 
   /**
    * Creates a new instance
    *
    * @param delegate the {@link ConnectionProvider} to be wrapped
-   * @param disableValidation whether to skip connection validation upon invocations of {@link #validate(Object)}
    * @param retryPolicyTemplate The {@link RetryPolicyTemplate} for retrying failed connection attempts
    */
-  public ReconnectableConnectionProviderWrapper(ConnectionProvider<C> delegate,
-                                                boolean disableValidation,
-                                                RetryPolicyTemplate retryPolicyTemplate) {
+  public ReconnectableConnectionProviderWrapper(ConnectionProvider<C> delegate, RetryPolicyTemplate retryPolicyTemplate) {
     super(delegate);
-    this.disableValidation = disableValidation;
     this.retryPolicyTemplate = retryPolicyTemplate;
   }
 
   /**
    * Delegates the responsibility of validating the connection to the delegated {@link ConnectionProvider}.
-   * If {@link #disableValidation} is {@code true}, then the validation is skipped, returning
-   * {@link ConnectionValidationResult#success()}
    *
    * @param connection a given connection
    * @return A {@link ConnectionValidationResult} returned by the delegated {@link ConnectionProvider}
    */
   @Override
   public ConnectionValidationResult validate(C connection) {
-    if (disableValidation) {
-      return ConnectionValidationResult.success();
-    }
     return getDelegate().validate(connection);
   }
 

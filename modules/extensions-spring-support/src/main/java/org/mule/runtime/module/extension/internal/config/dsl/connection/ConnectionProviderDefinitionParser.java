@@ -9,7 +9,6 @@ package org.mule.runtime.module.extension.internal.config.dsl.connection;
 import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromChildConfiguration;
 import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromFixedValue;
 import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromReferenceObject;
-import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromSimpleParameter;
 import static org.mule.runtime.dsl.api.component.TypeDefinition.fromType;
 import org.mule.runtime.api.config.PoolingProfile;
 import org.mule.runtime.api.meta.model.ExtensionModel;
@@ -55,7 +54,6 @@ public final class ConnectionProviderDefinitionParser extends ExtensionDefinitio
         .withConstructorParameterDefinition(fromFixedValue(extensionModel).build())
         .withConstructorParameterDefinition(fromReferenceObject(ExtensionsOAuthManager.class).build())
         .withConstructorParameterDefinition(fromReferenceObject(MuleContext.class).build())
-        .withSetterParameterDefinition("disableValidation", fromSimpleParameter("disableValidation").build())
         .withSetterParameterDefinition("retryPolicyTemplate",
                                        fromChildConfiguration(RetryPolicyTemplate.class).build())
         .withSetterParameterDefinition("poolingProfile", fromChildConfiguration(PoolingProfile.class).build());

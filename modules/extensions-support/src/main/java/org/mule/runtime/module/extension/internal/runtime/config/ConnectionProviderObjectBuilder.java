@@ -29,7 +29,6 @@ public abstract class ConnectionProviderObjectBuilder<C>
     extends ResolverSetBasedObjectBuilder<Pair<ConnectionProvider<C>, ResolverSetResult>> {
 
   protected final ConnectionProviderModel providerModel;
-  protected final boolean disableValidation;
   protected final RetryPolicyTemplate retryPolicyTemplate;
   protected final PoolingProfile poolingProfile;
   protected final ExtensionModel extensionModel;
@@ -47,12 +46,14 @@ public abstract class ConnectionProviderObjectBuilder<C>
   public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel, ResolverSet resolverSet,
                                          ConnectionManagerAdapter connectionManager, ExtensionModel extensionModel,
                                          MuleContext muleContext) {
-    this(providerModel, resolverSet, null, false, null, connectionManager, extensionModel, muleContext);
+    this(providerModel, resolverSet, null, null, connectionManager, extensionModel, muleContext);
   }
 
-  public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel, ResolverSet resolverSet,
-                                         PoolingProfile poolingProfile, boolean disableValidation,
-                                         RetryPolicyTemplate retryPolicyTemplate, ConnectionManagerAdapter connectionManager,
+  public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel,
+                                         ResolverSet resolverSet,
+                                         PoolingProfile poolingProfile, 
+                                         RetryPolicyTemplate retryPolicyTemplate,
+                                         ConnectionManagerAdapter connectionManager,
                                          ExtensionModel extensionModel, MuleContext muleContext) {
     super(getConnectionProviderFactory(providerModel).getObjectType(), providerModel, resolverSet);
     this.providerModel = providerModel;
@@ -61,13 +62,16 @@ public abstract class ConnectionProviderObjectBuilder<C>
     this.muleContext = muleContext;
     this.retryPolicyTemplate =
         retryPolicyTemplate != null ? retryPolicyTemplate : connectionManager.getDefaultRetryPolicyTemplate();
-    this.disableValidation = disableValidation;
   }
 
-  public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel, Class<?> prototypeClass, ResolverSet resolverSet,
-                                         PoolingProfile poolingProfile, boolean disableValidation,
-                                         RetryPolicyTemplate retryPolicyTemplate, ConnectionManagerAdapter connectionManager,
-                                         ExtensionModel extensionModel, MuleContext muleContext) {
+  public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel,
+                                         Class<?> prototypeClass,
+                                         ResolverSet resolverSet,
+                                         PoolingProfile poolingProfile,
+                                         RetryPolicyTemplate retryPolicyTemplate,
+                                         ConnectionManagerAdapter connectionManager,
+                                         ExtensionModel extensionModel,
+                                         MuleContext muleContext) {
     super(prototypeClass, providerModel, resolverSet);
     this.providerModel = providerModel;
     this.poolingProfile = poolingProfile;
@@ -75,7 +79,6 @@ public abstract class ConnectionProviderObjectBuilder<C>
     this.muleContext = muleContext;
     this.retryPolicyTemplate =
         retryPolicyTemplate != null ? retryPolicyTemplate : connectionManager.getDefaultRetryPolicyTemplate();
-    this.disableValidation = disableValidation;
   }
 
   /**

@@ -22,7 +22,6 @@ import static org.mule.runtime.api.meta.model.parameter.ParameterGroupModel.CONN
 import static org.mule.runtime.config.spring.api.XmlConfigurationDocumentLoader.noValidationDocumentLoader;
 import static org.mule.runtime.config.spring.internal.dsl.processor.xml.XmlCustomAttributeHandler.IS_CDATA;
 import static org.mule.runtime.deployment.model.internal.application.MuleApplicationClassLoader.resolveContextArtifactPluginClassLoaders;
-import static org.mule.runtime.extension.api.ExtensionConstants.DISABLE_CONNECTION_VALIDATION_PARAMETER_NAME;
 import static org.mule.runtime.extension.api.ExtensionConstants.POOLING_PROFILE_PARAMETER_NAME;
 import static org.mule.runtime.extension.api.ExtensionConstants.RECONNECTION_STRATEGY_PARAMETER_NAME;
 import static org.mule.runtime.extension.api.ExtensionConstants.REDELIVERY_POLICY_PARAMETER_NAME;
@@ -694,10 +693,6 @@ public class DefaultXmlArtifactDeclarationLoader implements XmlArtifactDeclarati
                   .withParameter(TLS_PARAMETER_NAME, tls.build())
                   .getDeclaration());
             });
-        return;
-
-      case DISABLE_CONNECTION_VALIDATION_PARAMETER_NAME:
-        // Nothing to do here, this has to be propagated as an attribute
         return;
     }
   }

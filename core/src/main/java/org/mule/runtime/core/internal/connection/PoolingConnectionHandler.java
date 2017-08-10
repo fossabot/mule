@@ -6,9 +6,9 @@
  */
 package org.mule.runtime.core.internal.connection;
 
-import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.PoolingListener;
+import org.mule.runtime.api.exception.MuleException;
 
 import org.apache.commons.pool.ObjectPool;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * @param <C> the generic type of the connection to be returned
  * @since 4.0
  */
-final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
+final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PoolingConnectionHandler.class);
 
@@ -32,7 +32,7 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
    * Creates a new instance
    *
    * @param connection the connection to be wrapped
-   * @param pool the pool from which the {@code connection} was obtained and to which it has to be returned
+   * @param pool       the pool from which the {@code connection} was obtained and to which it has to be returned
    */
   PoolingConnectionHandler(C connection, ObjectPool<C> pool, PoolingListener poolingListener) {
     this.connection = connection;
@@ -44,7 +44,7 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
    * @return the {@link #connection}
    */
   @Override
-  public C getConnection() throws ConnectionException {
+  protected C doGetConnection() throws ConnectionException {
     return connection;
   }
 
@@ -52,7 +52,7 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
    * Returns the {@link #connection} to the {@link #pool}
    */
   @Override
-  public void release() {
+  protected void doRelease() {
     boolean returnAttempted = false;
     try {
       poolingListener.onReturn(connection);
@@ -63,12 +63,17 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
       LOGGER.warn("Could not return connection to the pool. Connection will be destroyed", e);
     } finally {
       if (!returnAttempted) {
-        try {
-          pool.invalidateObject(connection);
-        } catch (Exception e) {
-          LOGGER.warn("Exception was found trying to invalidate connection of type " + connection.getClass().getName(), e);
-        }
+        doInvalidate();
       }
+    }
+  }
+
+  @Override
+  protected void doInvalidate() {
+    try {
+      pool.invalidateObject(connection);
+    } catch (Exception e) {
+      LOGGER.warn("Exception was found trying to invalidate connection of type " + connection.getClass().getName(), e);
     }
   }
 
@@ -76,7 +81,7 @@ final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
    * Does nothing for this implementation. Connections are only closed when the pool is.
    */
   @Override
-  public void close() throws MuleException {
+  protected void doClose() throws MuleException {
 
   }
 }

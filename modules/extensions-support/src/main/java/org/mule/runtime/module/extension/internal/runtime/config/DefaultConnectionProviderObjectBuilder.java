@@ -39,12 +39,11 @@ public class DefaultConnectionProviderObjectBuilder<C> extends ConnectionProvide
   }
 
   public DefaultConnectionProviderObjectBuilder(ConnectionProviderModel providerModel, ResolverSet resolverSet,
-                                                PoolingProfile poolingProfile, boolean disableValidation,
+                                                PoolingProfile poolingProfile,
                                                 RetryPolicyTemplate retryPolicyTemplate,
                                                 ConnectionManagerAdapter connectionManager,
                                                 ExtensionModel extensionModel, MuleContext muleContext) {
-    super(providerModel, resolverSet, poolingProfile, disableValidation,
-          retryPolicyTemplate, connectionManager, extensionModel, muleContext);
+    super(providerModel, resolverSet, poolingProfile, retryPolicyTemplate, connectionManager, extensionModel, muleContext);
   }
 
   @Override
@@ -72,9 +71,9 @@ public class DefaultConnectionProviderObjectBuilder<C> extends ConnectionProvide
   private ConnectionProvider<C> applyConnectionManagement(ConnectionProvider<C> provider) {
     final ConnectionManagementType connectionManagementType = providerModel.getConnectionManagementType();
     if (connectionManagementType == POOLING) {
-      provider = new PoolingConnectionProviderWrapper<>(provider, poolingProfile, disableValidation, retryPolicyTemplate);
+      provider = new PoolingConnectionProviderWrapper<>(provider, poolingProfile, retryPolicyTemplate);
     } else {
-      provider = new ReconnectableConnectionProviderWrapper<>(provider, disableValidation, retryPolicyTemplate);
+      provider = new ReconnectableConnectionProviderWrapper<>(provider, retryPolicyTemplate);
     }
     return provider;
   }
