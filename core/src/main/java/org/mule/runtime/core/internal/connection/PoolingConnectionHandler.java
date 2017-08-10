@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.internal.connection;
 
+import static org.mule.runtime.api.util.Preconditions.checkState;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.PoolingListener;
 import org.mule.runtime.api.exception.MuleException;
@@ -20,11 +21,11 @@ import org.slf4j.LoggerFactory;
  * @param <C> the generic type of the connection to be returned
  * @since 4.0
  */
-final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
+final class PoolingConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PoolingConnectionHandler.class);
 
-  private final C connection;
+  private C connection;
   private final ObjectPool<C> pool;
   private final PoolingListener poolingListener;
 
@@ -44,7 +45,8 @@ final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * @return the {@link #connection}
    */
   @Override
-  protected C doGetConnection() throws ConnectionException {
+  public C getConnection() throws ConnectionException {
+    checkState(connection != null, "Connection has been either released or invalidated");
     return connection;
   }
 
@@ -52,7 +54,7 @@ final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * Returns the {@link #connection} to the {@link #pool}
    */
   @Override
-  protected void doRelease() {
+  public void release() {
     boolean returnAttempted = false;
     try {
       poolingListener.onReturn(connection);
@@ -62,18 +64,24 @@ final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
     } catch (Exception e) {
       LOGGER.warn("Could not return connection to the pool. Connection will be destroyed", e);
     } finally {
-      if (!returnAttempted) {
-        doInvalidate();
+      try {
+        if (!returnAttempted) {
+          invalidate();
+        }
+      } finally {
+        connection = null;
       }
     }
   }
 
   @Override
-  protected void doInvalidate() {
+  public void invalidate() {
     try {
       pool.invalidateObject(connection);
     } catch (Exception e) {
       LOGGER.warn("Exception was found trying to invalidate connection of type " + connection.getClass().getName(), e);
+    } finally {
+      connection = null;
     }
   }
 
@@ -81,7 +89,7 @@ final class PoolingConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * Does nothing for this implementation. Connections are only closed when the pool is.
    */
   @Override
-  protected void doClose() throws MuleException {
+  public void close() throws MuleException {
 
   }
 }

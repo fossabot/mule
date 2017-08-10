@@ -13,7 +13,6 @@ import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionHandler;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.tx.TransactionException;
-import org.mule.runtime.core.internal.connection.AbstractConnectionHandler;
 import org.mule.runtime.core.internal.connection.ConnectionHandlerAdapter;
 import org.mule.runtime.extension.api.connectivity.TransactionalConnection;
 
@@ -25,10 +24,10 @@ import org.slf4j.Logger;
  * @param <T> The generic type of the {@link TransactionalConnection}
  * @since 4.0
  */
-public final class TransactionalConnectionHandler<T extends TransactionalConnection> extends AbstractConnectionHandler<T> {
+public final class TransactionalConnectionHandler<T extends TransactionalConnection> implements ConnectionHandlerAdapter<T> {
 
   private static final Logger LOGGER = getLogger(TransactionalConnectionHandler.class);
-  
+
   private final ExtensionTransactionalResource<T> resource;
 
   /**
@@ -45,7 +44,7 @@ public final class TransactionalConnectionHandler<T extends TransactionalConnect
    * {@inheritDoc}
    */
   @Override
-  protected T doGetConnection() throws ConnectionException {
+  public T getConnection() throws ConnectionException {
     return resource.getConnection();
   }
 
@@ -54,11 +53,10 @@ public final class TransactionalConnectionHandler<T extends TransactionalConnect
    */
 
   @Override
-  protected void doRelease() {
-  }
+  public void release() {}
 
   @Override
-  protected void doInvalidate() {
+  public void invalidate() {
     try {
       forceRollback();
     } catch (Exception e) {
@@ -77,7 +75,7 @@ public final class TransactionalConnectionHandler<T extends TransactionalConnect
    * @throws MuleException if anything goes wrong
    */
   @Override
-  protected void doClose() throws MuleException {
+  public void close() throws MuleException {
     try {
       forceRollback();
     } finally {

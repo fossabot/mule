@@ -147,7 +147,7 @@ public class DefaultExecutionMediatorTestCase extends AbstractMuleContextTestCas
                                             muleContext.getErrorTypeRepository());
 
     final ReconnectableConnectionProviderWrapper<Object> connectionProviderWrapper =
-        new ReconnectableConnectionProviderWrapper<>(null, false, new SimpleRetryPolicyTemplate(10, RETRY_COUNT));
+        new ReconnectableConnectionProviderWrapper<>(null, new SimpleRetryPolicyTemplate(10, RETRY_COUNT));
     initialiseIfNeeded(connectionProviderWrapper, true, muleContext);
     Optional<ConnectionProvider> connectionProvider = Optional.of(connectionProviderWrapper);
 

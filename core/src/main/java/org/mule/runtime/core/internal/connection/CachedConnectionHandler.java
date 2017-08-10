@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @param <C> the generic type of the connection being wrapped
  * @since 4.0
  */
-final class CachedConnectionHandler<C> extends AbstractConnectionHandler<C> {
+final class CachedConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CachedConnectionHandler.class);
 
@@ -57,7 +57,7 @@ final class CachedConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * @throws IllegalStateException if the first invocation is executed while the {@link #muleContext} is stopping or stopped
    */
   @Override
-  protected C doGetConnection() throws ConnectionException {
+  public C getConnection() throws ConnectionException {
     return connection.get();
   }
 
@@ -70,7 +70,7 @@ final class CachedConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * This implementation doesn't require the concept of release. This method does nothing
    */
   @Override
-  protected void doRelease() {
+  public void release() {
     // no-op
   }
 
@@ -80,12 +80,12 @@ final class CachedConnectionHandler<C> extends AbstractConnectionHandler<C> {
    * @throws MuleException in case of error
    */
   @Override
-  protected void doClose() throws MuleException {
+  public void close() throws MuleException {
     disconnectAndCleanConnection();
   }
 
   @Override
-  protected void doInvalidate() {
+  public void invalidate() {
     disconnectAndCleanConnection();
     lazyConnect();
   }

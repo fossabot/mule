@@ -10,6 +10,8 @@ import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.exception.MuleException;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A {@link ConnectionHandlerAdapter} which doesn't perform any management.
  * <p>
@@ -21,11 +23,11 @@ import org.mule.runtime.api.exception.MuleException;
  * @param <C> the generic type of the connections to be handled
  * @since 4.0
  */
-final class PassThroughConnectionHandler<C> extends AbstractConnectionHandler<C> {
+final class PassThroughConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
 
   private final C connection;
   private final ConnectionProvider<C> connectionProvider;
-
+  private final AtomicBoolean released = new AtomicBoolean(false);
 
   /**
    * Creates a new instance
@@ -42,7 +44,7 @@ final class PassThroughConnectionHandler<C> extends AbstractConnectionHandler<C>
    * @return {@link #connection}
    */
   @Override
-  protected C doGetConnection() throws ConnectionException {
+  public C getConnection() throws ConnectionException {
     return connection;
   }
 
@@ -50,8 +52,8 @@ final class PassThroughConnectionHandler<C> extends AbstractConnectionHandler<C>
    * Delegates into {@link #release()}
    */
   @Override
-  protected void doClose() throws MuleException {
-    doRelease();
+  public void close() throws MuleException {
+    release();
   }
 
   /**
@@ -59,12 +61,14 @@ final class PassThroughConnectionHandler<C> extends AbstractConnectionHandler<C>
    * argument. This method is thread safe, {@link #connection} will not be disconnected twice
    */
   @Override
-  protected void doRelease() {
-    connectionProvider.disconnect(connection);
+  public void release() {
+    if (released.compareAndSet(false, true)) {
+      connectionProvider.disconnect(connection);
+    }
   }
 
   @Override
-  protected void doInvalidate() {
-    doRelease();
+  public void invalidate() {
+    release();
   }
 }

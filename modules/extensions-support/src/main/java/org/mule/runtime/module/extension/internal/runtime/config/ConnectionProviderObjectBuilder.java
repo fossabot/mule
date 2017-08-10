@@ -51,7 +51,7 @@ public abstract class ConnectionProviderObjectBuilder<C>
 
   public ConnectionProviderObjectBuilder(ConnectionProviderModel providerModel,
                                          ResolverSet resolverSet,
-                                         PoolingProfile poolingProfile, 
+                                         PoolingProfile poolingProfile,
                                          RetryPolicyTemplate retryPolicyTemplate,
                                          ConnectionManagerAdapter connectionManager,
                                          ExtensionModel extensionModel, MuleContext muleContext) {
