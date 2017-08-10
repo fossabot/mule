@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.module.tls.internal;
+package org.mule.runtime.module.tls.api;
 
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
@@ -13,6 +13,7 @@ import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.tls.AbstractTlsContextFactoryBuilderFactory;
 import org.mule.runtime.api.tls.TlsContextFactory;
 import org.mule.runtime.api.tls.TlsContextFactoryBuilder;
+import org.mule.runtime.module.tls.internal.*;
 
 /**
  * Default implementation of {@link AbstractTlsContextFactoryBuilderFactory} which has a default TLS context. This is injected into
@@ -34,7 +35,7 @@ public class DefaultTlsContextFactoryBuilderFactory extends AbstractTlsContextFa
 
   @Override
   protected TlsContextFactoryBuilder create() {
-    return new DefaultTlsContextFactoryBuilder(defaultTlsContextFactory);
+    return new org.mule.runtime.module.tls.internal.DefaultTlsContextFactoryBuilder(defaultTlsContextFactory);
   }
 
 }

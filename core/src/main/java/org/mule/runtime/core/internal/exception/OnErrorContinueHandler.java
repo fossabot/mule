@@ -17,6 +17,7 @@ import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.exception.ErrorTypeMatcher;
 import org.mule.runtime.core.api.exception.ErrorTypeRepository;
 import org.mule.runtime.core.api.exception.SingleErrorTypeMatcher;
+import org.mule.runtime.core.api.exception.TemplateOnErrorHandler;
 import org.mule.runtime.core.internal.message.InternalMessage;
 
 /**

@@ -7,15 +7,14 @@
 package org.mule.runtime.core.internal.exception;
 
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
-import static reactor.core.publisher.Mono.from;
 import static reactor.core.publisher.Mono.just;
-
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.exception.MessageRedeliveredException;
 import org.mule.runtime.core.api.exception.MessagingException;
+import org.mule.runtime.core.api.exception.TemplateOnErrorHandler;
 import org.mule.runtime.core.api.processor.Processor;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
 
 //TODO: MULE-9307 re-write junits for rollback exception strategy
 

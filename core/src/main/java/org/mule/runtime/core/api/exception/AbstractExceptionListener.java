@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.core.internal.exception;
+package org.mule.runtime.core.api.exception;
 
 import static java.lang.Boolean.TRUE;
 import static java.text.MessageFormat.format;
@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.mule.runtime.core.api.context.notification.EnrichedNotificationInfo.createInfo;
 import static org.mule.runtime.core.api.context.notification.SecurityNotification.SECURITY_AUTHENTICATION_FAILED;
-
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.security.SecurityException;
@@ -22,14 +21,11 @@ import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.context.notification.ExceptionNotification;
 import org.mule.runtime.core.api.context.notification.SecurityNotification;
 import org.mule.runtime.core.api.context.notification.ServerNotification;
-import org.mule.runtime.core.api.exception.MessagingException;
-import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
-import org.mule.runtime.core.api.exception.TypedException;
 import org.mule.runtime.core.api.management.stats.FlowConstructStatistics;
+import org.mule.runtime.core.api.processor.AbstractMessageProcessorOwner;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.transaction.TransactionCoordination;
 import org.mule.runtime.core.internal.config.ExceptionHelper;
-import org.mule.runtime.core.api.processor.AbstractMessageProcessorOwner;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

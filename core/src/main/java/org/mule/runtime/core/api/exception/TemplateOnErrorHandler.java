@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.core.internal.exception;
+package org.mule.runtime.core.api.exception;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.stream;
@@ -21,23 +21,17 @@ import static org.mule.runtime.core.api.processor.MessageProcessors.processWithC
 import static org.mule.runtime.core.api.rx.Exceptions.unwrap;
 import static reactor.core.publisher.Mono.from;
 import static reactor.core.publisher.Mono.just;
-
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.context.notification.ErrorHandlerNotification;
-import org.mule.runtime.core.api.exception.DisjunctiveErrorTypeMatcher;
-import org.mule.runtime.core.api.exception.ErrorTypeMatcher;
-import org.mule.runtime.core.api.exception.ErrorTypeRepository;
-import org.mule.runtime.core.api.exception.MessagingException;
-import org.mule.runtime.core.api.exception.MessagingExceptionHandlerAcceptor;
-import org.mule.runtime.core.api.exception.SingleErrorTypeMatcher;
 import org.mule.runtime.core.api.management.stats.FlowConstructStatistics;
 import org.mule.runtime.core.api.processor.MessageProcessorChain;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.transaction.TransactionCoordination;
+import org.mule.runtime.core.internal.exception.MessagingExceptionHandlerToSystemAdapter;
 import org.mule.runtime.core.internal.message.DefaultExceptionPayload;
 import org.mule.runtime.core.internal.message.InternalMessage;
 import org.mule.runtime.core.privileged.routing.requestreply.ReplyToPropertyRequestReplyReplier;

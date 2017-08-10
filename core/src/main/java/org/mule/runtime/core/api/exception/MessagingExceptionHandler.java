@@ -6,13 +6,13 @@
  */
 package org.mule.runtime.core.api.exception;
 
+import static java.util.Collections.EMPTY_LIST;
 import static org.mule.runtime.core.api.rx.Exceptions.propagateWrappingFatal;
 import static reactor.core.publisher.Flux.error;
 import static reactor.core.publisher.Mono.just;
-
 import org.mule.runtime.core.api.Event;
-import org.mule.runtime.core.api.exception.MessagingException;
 
+import java.util.List;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -43,6 +43,10 @@ public interface MessagingExceptionHandler extends ExceptionHandler, Function<Me
     } catch (Throwable throwable) {
       return error(propagateWrappingFatal(throwable));
     }
+  }
+
+  default List<MessagingExceptionHandlerAcceptor> getExceptionListeners() {
+    return EMPTY_LIST;
   }
 }
 

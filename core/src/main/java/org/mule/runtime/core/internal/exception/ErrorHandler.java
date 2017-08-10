@@ -27,10 +27,11 @@ import org.mule.runtime.core.api.exception.SingleErrorTypeMatcher;
 import org.mule.runtime.core.api.processor.AbstractMuleObjectOwner;
 import org.mule.runtime.core.internal.message.DefaultExceptionPayload;
 import org.mule.runtime.core.internal.message.InternalMessage;
-import org.reactivestreams.Publisher;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.reactivestreams.Publisher;
 
 /**
  * Selects which "on error" handler to execute based on filtering. Replaces the choice-exception-strategy from Mule 3. On error
@@ -102,6 +103,7 @@ public class ErrorHandler extends AbstractMuleObjectOwner<MessagingExceptionHand
     this.exceptionListeners = exceptionListeners;
   }
 
+  @Override
   public List<MessagingExceptionHandlerAcceptor> getExceptionListeners() {
     return unmodifiableList(exceptionListeners);
   }

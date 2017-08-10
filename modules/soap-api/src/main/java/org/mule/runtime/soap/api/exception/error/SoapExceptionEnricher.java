@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.soap.internal.exception.error;
+package org.mule.runtime.soap.api.exception.error;
 
 import static org.mule.runtime.soap.api.exception.error.SoapErrors.BAD_REQUEST;
 import static org.mule.runtime.soap.api.exception.error.SoapErrors.BAD_RESPONSE;

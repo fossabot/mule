@@ -75,7 +75,7 @@ import static org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescrip
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_PACKAGES;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_RESOURCES;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.MAVEN;
-import static org.mule.runtime.extension.internal.loader.XmlExtensionModelLoader.RESOURCE_XML;
+import static org.mule.runtime.extension.api.loader.xml.XmlExtensionModelLoader.RESOURCE_XML;
 import static org.mule.runtime.module.deployment.impl.internal.policy.PropertiesBundleDescriptorLoader.ARTIFACT_ID;
 import static org.mule.runtime.module.deployment.impl.internal.policy.PropertiesBundleDescriptorLoader.CLASSIFIER;
 import static org.mule.runtime.module.deployment.impl.internal.policy.PropertiesBundleDescriptorLoader.GROUP_ID;
@@ -110,11 +110,11 @@ import org.mule.runtime.core.api.exception.MessagingException;
 import org.mule.runtime.core.api.policy.PolicyParametrization;
 import org.mule.runtime.core.api.policy.PolicyPointcut;
 import org.mule.runtime.core.api.registry.MuleRegistry;
+import org.mule.runtime.core.api.registry.SpiServiceRegistry;
 import org.mule.runtime.core.api.util.FileUtils;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.core.api.util.concurrent.Latch;
 import org.mule.runtime.core.internal.config.StartupContext;
-import org.mule.runtime.core.api.registry.SpiServiceRegistry;
 import org.mule.runtime.deployment.model.api.application.Application;
 import org.mule.runtime.deployment.model.api.application.ApplicationStatus;
 import org.mule.runtime.deployment.model.api.domain.Domain;
@@ -123,7 +123,7 @@ import org.mule.runtime.deployment.model.api.policy.PolicyRegistrationException;
 import org.mule.runtime.deployment.model.internal.application.MuleApplicationClassLoaderFactory;
 import org.mule.runtime.deployment.model.internal.domain.DomainClassLoaderFactory;
 import org.mule.runtime.deployment.model.internal.nativelib.DefaultNativeLibraryFinderFactory;
-import org.mule.runtime.extension.internal.loader.XmlExtensionModelLoader;
+import org.mule.runtime.extension.api.loader.xml.XmlExtensionModelLoader;
 import org.mule.runtime.module.artifact.builder.TestArtifactDescriptor;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.deployment.api.DeploymentListener;
@@ -154,16 +154,6 @@ import org.mule.tck.probe.file.FileExists;
 import org.mule.tck.util.CompilerUtils.ExtensionCompiler;
 import org.mule.tck.util.CompilerUtils.JarCompiler;
 import org.mule.tck.util.CompilerUtils.SingleClassCompiler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.mockito.verification.VerificationMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -179,6 +169,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.mockito.verification.VerificationMode;
 
 @RunWith(Parameterized.class)
 public class DeploymentServiceTestCase extends AbstractMuleTestCase {
