@@ -845,6 +845,56 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="EmptyPagedOperationType" substitutionGroup="heisenberg-empire" name="empty-paged-operation"></xs:element>
+  <xs:complexType name="EmptyPagedOperationType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
+          <xs:annotation>
+            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="FailingPagedOperationType" substitutionGroup="heisenberg-empire" name="failing-paged-operation"></xs:element>
+  <xs:complexType name="FailingPagedOperationType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
+          <xs:annotation>
+            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="GetAllEnemiesType" substitutionGroup="heisenberg-empire" name="get-all-enemies"></xs:element>
   <xs:complexType name="GetAllEnemiesType">
     <xs:complexContent>
@@ -905,6 +955,31 @@
         <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
           <xs:annotation>
             <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
+          <xs:annotation>
+            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="GetPagedPersonalInfoType" substitutionGroup="heisenberg-empire" name="get-paged-personal-info"></xs:element>
+  <xs:complexType name="GetPagedPersonalInfoType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:string" use="optional" name="target">
@@ -1007,6 +1082,31 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="PagedOperationUsingConnectionType" substitutionGroup="heisenberg-empire" name="paged-operation-using-connection"></xs:element>
+  <xs:complexType name="PagedOperationUsingConnectionType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
+          <xs:annotation>
+            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="SayMyNameType" substitutionGroup="heisenberg-empire" name="say-my-name"></xs:element>
   <xs:complexType name="SayMyNameType">
     <xs:complexContent>
@@ -1022,6 +1122,31 @@
         <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
           <xs:annotation>
             <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
+          <xs:annotation>
+            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="StickyPagedOperationType" substitutionGroup="heisenberg-empire" name="sticky-paged-operation"></xs:element>
+  <xs:complexType name="StickyPagedOperationType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:string" use="optional" name="target">
@@ -1189,61 +1314,11 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="EmptyPagedOperationType" substitutionGroup="heisenberg-empire" name="empty-paged-operation"></xs:element>
-  <xs:complexType name="EmptyPagedOperationType">
-    <xs:complexContent>
-      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
-        </xs:sequence>
-        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
-          <xs:annotation>
-            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" use="optional" name="target">
-          <xs:annotation>
-            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
-          <xs:annotation>
-            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="FailToExecuteType" substitutionGroup="heisenberg-empire" name="fail-to-execute"></xs:element>
   <xs:complexType name="FailToExecuteType">
     <xs:complexContent>
       <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
         <xs:sequence minOccurs="0" maxOccurs="1"></xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="FailingPagedOperationType" substitutionGroup="heisenberg-empire" name="failing-paged-operation"></xs:element>
-  <xs:complexType name="FailingPagedOperationType">
-    <xs:complexContent>
-      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
-        </xs:sequence>
-        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
-          <xs:annotation>
-            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" use="optional" name="target">
-          <xs:annotation>
-            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
-          <xs:annotation>
-            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1392,31 +1467,6 @@
           </xs:element>
         </xs:sequence>
         <xs:attribute type="mule:expressionMap" use="optional" name="healthByYear"></xs:attribute>
-        <xs:attribute type="xs:string" use="optional" name="target">
-          <xs:annotation>
-            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
-          <xs:annotation>
-            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="GetPagedPersonalInfoType" substitutionGroup="heisenberg-empire" name="get-paged-personal-info"></xs:element>
-  <xs:complexType name="GetPagedPersonalInfoType">
-    <xs:complexContent>
-      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
-        </xs:sequence>
-        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
-          <xs:annotation>
-            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
         <xs:attribute type="xs:string" use="optional" name="target">
           <xs:annotation>
             <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
@@ -1794,31 +1844,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="PagedOperationUsingConnectionType" substitutionGroup="heisenberg-empire" name="paged-operation-using-connection"></xs:element>
-  <xs:complexType name="PagedOperationUsingConnectionType">
-    <xs:complexContent>
-      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
-        </xs:sequence>
-        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
-          <xs:annotation>
-            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" use="optional" name="target">
-          <xs:annotation>
-            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
-          <xs:annotation>
-            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="ProcessAddressBookType" substitutionGroup="heisenberg-empire" name="process-address-book"></xs:element>
   <xs:complexType name="ProcessAddressBookType">
     <xs:complexContent>
@@ -2026,31 +2051,6 @@
         <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
           <xs:annotation>
             <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="xs:string" use="optional" name="target">
-          <xs:annotation>
-            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute type="mule:targetTypeEnumType" use="optional" default="PAYLOAD" name="targetType">
-          <xs:annotation>
-            <xs:documentation>The type of the operation's output that will be stored in the target variable</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element xmlns="http://www.mulesoft.org/schema/mule/heisenberg" type="StickyPagedOperationType" substitutionGroup="heisenberg-empire" name="sticky-paged-operation"></xs:element>
-  <xs:complexType name="StickyPagedOperationType">
-    <xs:complexContent>
-      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
-        <xs:sequence minOccurs="0" maxOccurs="1">
-          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-object-streaming-strategy"></xs:element>
-        </xs:sequence>
-        <xs:attribute type="mule:substitutableName" use="optional" name="config-ref">
-          <xs:annotation>
-            <xs:documentation>Specify which configuration to use for this invocation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:string" use="optional" name="target">
