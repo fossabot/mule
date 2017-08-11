@@ -24,16 +24,17 @@ import static org.mule.runtime.core.api.rx.Exceptions.checkedFunction;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.el.mvel.MessageVariableResolverFactory.FLOW_VARS;
 import static org.mule.runtime.core.internal.interception.DefaultInterceptionEvent.INTERCEPTION_RESOLVED_CONTEXT;
+import static org.mule.runtime.module.extension.api.util.MuleExtensionUtils.getInitialiserEvent;
 import static org.mule.runtime.module.extension.internal.runtime.ExecutionTypeMapper.asProcessingType;
 import static org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolvingContext.from;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.isVoid;
 import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils.getClassLoader;
-import static org.mule.runtime.module.extension.api.util.MuleExtensionUtils.getInitialiserEvent;
 import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils.getOperationExecutorFactory;
 import static org.slf4j.LoggerFactory.getLogger;
 import static reactor.core.publisher.Flux.error;
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Mono.fromCallable;
+
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
@@ -74,14 +75,12 @@ import org.mule.runtime.module.extension.internal.runtime.LazyExecutionContext;
 import org.mule.runtime.module.extension.internal.runtime.execution.OperationArgumentResolverFactory;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ParameterValueResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ResolverSet;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import reactor.core.publisher.Mono;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A {@link Processor} capable of executing extension operations.
@@ -179,15 +178,7 @@ public class OperationMessageProcessor extends ExtensionComponent<OperationModel
           // create the MessagingException in ReactorCompletionCallback where Mono.error is used but we don't have a reference
           // to the processor there.
           return doProcess(operationEvent, operationContext)
-              .onErrorMap(e -> !(e instanceof MessagingException),
-                          e -> {
-                            // MULE-13009 Inconsistent error propagation in extension operations depending on operation type
-                            if (operationModel.isBlocking()) {
-                              return new MessagingException(event, e);
-                            } else {
-                              return new MessagingException(event, e, this);
-                            }
-                          });
+              .onErrorMap(e -> !(e instanceof MessagingException), e -> new MessagingException(event, e, this));
         };
       }
       if (getLocation() != null) {

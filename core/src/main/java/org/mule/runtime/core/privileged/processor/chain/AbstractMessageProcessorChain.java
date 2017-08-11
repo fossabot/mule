@@ -17,12 +17,13 @@ import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNee
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.setMuleContextIfNeeded;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.stopIfNeeded;
 import static org.mule.runtime.core.api.processor.MessageProcessors.processToApply;
-import static org.mule.runtime.core.api.util.ExceptionUtils.updateMessagingExceptionWithError;
+import static org.mule.runtime.core.api.util.MessagingExceptionResolver.resolve;
 import static org.mule.runtime.core.api.util.StreamingUtils.updateEventForStreaming;
 import static org.mule.runtime.core.api.util.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Flux.just;
+
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.lifecycle.Startable;
@@ -39,9 +40,11 @@ import org.mule.runtime.core.api.processor.ReactiveProcessor;
 import org.mule.runtime.core.api.processor.strategy.ProcessingStrategy;
 import org.mule.runtime.core.api.registry.RegistrationException;
 import org.mule.runtime.core.api.streaming.StreamingManager;
-import org.mule.runtime.core.api.util.ExceptionUtils;
 import org.mule.runtime.core.internal.processor.interceptor.ReactiveInterceptorAdapter;
-
+import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,11 +53,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Builder needs to return a composite rather than the first MessageProcessor in the chain. This is so that if this chain is
@@ -170,9 +168,8 @@ abstract class AbstractMessageProcessorChain extends AbstractAnnotatedObject imp
         .transform(next)
         .onErrorResume(RejectedExecutionException.class,
                        throwable -> Mono.from(event.getContext()
-                           .error(updateMessagingExceptionWithError(new MessagingException(event, throwable, processor),
-                                                                    processor, muleContext)))
-                           .then(Mono.empty()))
+                                                .error(resolve(processor, new MessagingException(event, throwable, processor), muleContext.getErrorTypeLocator())))
+                                      .then(Mono.empty()))
         .onErrorResume(MessagingException.class,
                        throwable -> {
                          if (!throwable.getEvent().getError().isPresent()) {
@@ -187,8 +184,7 @@ abstract class AbstractMessageProcessorChain extends AbstractAnnotatedObject imp
   }
 
   private Function<MessagingException, MessagingException> updateMessagingException(Processor processor) {
-    return exception -> ExceptionUtils.updateMessagingException(LOGGER, processor, exception, muleContext.getErrorTypeLocator(),
-                                                                muleContext.getErrorTypeRepository(), muleContext);
+    return exception -> resolve(processor, exception, muleContext.getErrorTypeLocator());
   }
 
   private Consumer<InternalEvent> preNotification(Processor processor) {

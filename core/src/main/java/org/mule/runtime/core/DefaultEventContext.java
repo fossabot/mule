@@ -11,8 +11,8 @@ import static java.time.OffsetTime.now;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static org.mule.runtime.core.api.util.ExceptionUtils.NULL_ERROR_HANDLER;
 import static org.mule.runtime.core.api.util.StringUtils.EMPTY;
+
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.core.api.InternalEvent;
 import org.mule.runtime.core.api.InternalEventContext;
@@ -23,13 +23,11 @@ import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
 import org.mule.runtime.core.api.management.stats.ProcessingTime;
 import org.mule.runtime.core.api.source.MessageSource;
 import org.mule.runtime.core.internal.context.notification.DefaultProcessorsTrace;
-
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 import java.io.Serializable;
 import java.time.OffsetTime;
 import java.util.Optional;
-
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
 
 /**
  * Default immutable implementation of {@link InternalEventContext}.

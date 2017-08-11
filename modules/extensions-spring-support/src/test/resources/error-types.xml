@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:heisenberg="http://www.mulesoft.org/schema/mule/heisenberg"
+      xmlns:marvel="http://www.mulesoft.org/schema/mule/marvel"
+      xmlns:petstore="http://www.mulesoft.org/schema/mule/petstore"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/heisenberg http://www.mulesoft.org/schema/mule/heisenberg/current/mule-heisenberg.xsd
+                          http://www.mulesoft.org/schema/mule/marvel http://www.mulesoft.org/schema/mule/marvel/current/mule-marvel.xsd
+                          http://www.mulesoft.org/schema/mule/petstore http://www.mulesoft.org/schema/mule/petstore/current/mule-petstore.xsd
+                          http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <heisenberg:config name="heisenberg"
+                       myName="heisenberg"
+                       age="50"
+                       cancer="true"
+                       dateOfBirth="1959-09-07T00:00:00"
+                       dateOfDeath="2011-09-07T00:00:00-05:00"
+                       money="1000000"
+                       finalHealth="CANCER">
+        <heisenberg:enemies>
+            <heisenberg:enemy value="Gustavo Fring"/>
+            <heisenberg:enemy value="Hank"/>
+        </heisenberg:enemies>
+        <heisenberg:monthly-incomes>
+            <heisenberg:monthly-income value="12000"/>
+            <heisenberg:monthly-income value="500"/>
+        </heisenberg:monthly-incomes>
+        <heisenberg:next-door address="pollos hermanos" victim="Gustavo Fring">
+            <heisenberg:previous victim="Krazy-8" address="Jesse's"/>
+        </heisenberg:next-door>
+        <heisenberg:ricin-packs>
+            <heisenberg:ricin microgramsPerKilo="22">
+                <heisenberg:destination victim="Lidia" address="Stevia coffe shop"/>
+            </heisenberg:ricin>
+        </heisenberg:ricin-packs>
+        <heisenberg:known-addresses>
+            <heisenberg:known-address value="one address"/>
+        </heisenberg:known-addresses>
+        <heisenberg:inline-barber-preferences beardTrimming="MUSTACHE" fullyBald="false"/>
+    </heisenberg:config>
+
+    <petstore:config name="config" cashierName="cashierName">
+        <petstore:connection username="john" password="doe"/>
+        <petstore:pets>
+            <petstore:pet value="Dog"/>
+        </petstore:pets>
+    </petstore:config>
+
+    <marvel:dr-strange-config name="drStrange" />
+
+    <flow name="mapping">
+        <heisenberg:read-marvel-stream config="drStrange">
+            <error-mapping sourceType="CONNECTIVITY" targetType="CONNECTIVITY_MAPPING"/>
+        </heisenberg:read-marvel-stream>
+        <error-handler>
+            <on-error-continue type="CONNECTIVITY_MAPPING">
+                <set-payload value="Could not connect."/>
+            </on-error-continue>
+            <on-error-continue>
+                <set-payload value="Error."/>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+    <flow name="previousConnectorError">
+        <heisenberg:read-marvel-stream config="drStrange"/>
+        <!--<error-handler>-->
+            <!--<on-error-continue name="HTTP">-->
+                <!--<set-payload value="Could not connect."/>-->
+            <!--</on-error-continue>-->
+            <!--<on-error-continue>-->
+                <!--<set-payload value="Error."/>-->
+            <!--</on-error-continue>-->
+        <!--</error-handler>-->
+    </flow>
+
+    <flow name="previousConnectorError2">
+        <petstore:fail-mv config="drStrange"/>
+        <!--<error-handler>-->
+        <!--<on-error-continue name="HTTP">-->
+        <!--<set-payload value="Could not connect."/>-->
+        <!--</on-error-continue>-->
+        <!--<on-error-continue>-->
+        <!--<set-payload value="Error."/>-->
+        <!--</on-error-continue>-->
+        <!--</error-handler>-->
+    </flow>
+
+
+    <flow name="previousConnectorError3">
+        <petstore:fail-mv-non-blocking config="drStrange"/>
+        <!--<error-handler>-->
+        <!--<on-error-continue name="HTTP">-->
+        <!--<set-payload value="Could not connect."/>-->
+        <!--</on-error-continue>-->
+        <!--<on-error-continue>-->
+        <!--<set-payload value="Error."/>-->
+        <!--</on-error-continue>-->
+        <!--</error-handler>-->
+    </flow>
+
+    <flow name="previousMuleError">
+        <set-payload value="asd"/>
+    </flow>
+
+    <flow name="commonConnection">
+        <set-payload value="asd"/>
+    </flow>
+
+</mule>

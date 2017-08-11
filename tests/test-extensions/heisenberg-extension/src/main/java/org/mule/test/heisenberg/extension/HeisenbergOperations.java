@@ -10,6 +10,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.mule.runtime.api.meta.model.operation.ExecutionType.CPU_INTENSIVE;
 import static org.mule.runtime.extension.api.annotation.param.Optional.PAYLOAD;
+
+import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Disposable;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.core.api.NestedProcessor;
@@ -29,6 +31,8 @@ import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.client.DefaultOperationParameters;
+import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.runtime.parameter.Literal;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
@@ -50,16 +54,15 @@ import org.mule.test.heisenberg.extension.model.SaleInfo;
 import org.mule.test.heisenberg.extension.model.Weapon;
 import org.mule.test.heisenberg.extension.model.types.IntegerAttributes;
 import org.mule.test.heisenberg.extension.model.types.WeaponType;
-
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 
 public class HeisenbergOperations implements Disposable {
@@ -82,6 +85,9 @@ public class HeisenbergOperations implements Disposable {
 
   @Inject
   private ExtensionManager extensionManager;
+
+  @Inject
+  private ExtensionsClient client;
 
   @Streaming
   public String sayMyName(@Config HeisenbergExtension config) {
@@ -283,6 +289,15 @@ public class HeisenbergOperations implements Disposable {
 
   public InputStream nameAsStream(@Config HeisenbergExtension config) {
     return new ByteArrayInputStream(sayMyName(config).getBytes());
+  }
+
+  public String readMarvelStream(String config) throws MuleException {
+    ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
+    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
+//    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
+    Result<String, Serializable> execute = client.execute("Marvel", "fail", params2);
+    return execute.getOutput();
   }
 
   @Override

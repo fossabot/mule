@@ -34,17 +34,14 @@ import org.mule.runtime.core.api.processor.ReactiveProcessor;
 import org.mule.runtime.core.api.processor.Router;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyExhaustedException;
 import org.mule.runtime.core.api.retry.policy.SimpleRetryPolicyTemplate;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import javax.inject.Inject;
-
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * UntilSuccessful attempts to route a message to the message processor it contains. Routing is considered successful if no
@@ -120,7 +117,7 @@ public class UntilSuccessful extends AbstractMuleObjectOwner implements Router {
 
   private Function<Throwable, Throwable> getThrowableFunction(InternalEvent event) {
     return throwable -> {
-      Throwable cause = getMessagingExceptionCause(throwable);
+      Throwable cause = getMessagingExceptionCause(throwable).orElse(throwable);
       return new MessagingException(event,
                                     new RetryPolicyExhaustedException(createStaticMessage(UNTIL_SUCCESSFUL_MSG_PREFIX,
                                                                                           cause.getMessage()),

@@ -16,9 +16,10 @@ import static org.mule.runtime.core.api.InternalEvent.setCurrentEvent;
 import static org.mule.runtime.core.api.construct.Flow.INITIAL_STATE_STARTED;
 import static org.mule.runtime.core.api.processor.MessageProcessors.processToApply;
 import static org.mule.runtime.core.api.processor.strategy.AsyncProcessingStrategyFactory.DEFAULT_MAX_CONCURRENCY;
-import static org.mule.runtime.core.api.util.ExceptionUtils.updateMessagingExceptionWithError;
+import static org.mule.runtime.core.api.util.MessagingExceptionResolver.resolve;
 import static org.mule.runtime.core.internal.construct.AbstractFlowConstruct.createFlowStatistics;
 import static reactor.core.publisher.Flux.from;
+
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.message.Error;
 import org.mule.runtime.api.message.Message;
@@ -38,13 +39,11 @@ import org.mule.runtime.core.internal.construct.processor.FlowConstructStatistic
 import org.mule.runtime.core.internal.exception.AbstractExceptionListener;
 import org.mule.runtime.core.internal.processor.strategy.TransactionAwareWorkQueueProcessingStrategyFactory;
 import org.mule.runtime.core.internal.routing.requestreply.SimpleAsyncRequestReplyRequester.AsyncReplyToPropertyRequestReplyReplier;
-
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
-
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
 
 /**
  * Creates instances of {@link Flow} with a default implementation
@@ -225,7 +224,7 @@ public class DefaultFlowBuilder implements Builder {
               getSink().accept(request);
             } catch (RejectedExecutionException ree) {
               request.getContext()
-                  .error(updateMessagingExceptionWithError(new MessagingException(event, ree, this), this, getMuleContext()));
+                  .error(resolve(this, new MessagingException(event, ree, this), getMuleContext().getErrorTypeLocator()));
             }
             return Mono.from(request.getContext().getResponsePublisher())
                 .map(r -> {

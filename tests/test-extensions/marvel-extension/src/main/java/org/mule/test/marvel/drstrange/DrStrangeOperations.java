@@ -14,12 +14,14 @@ import static org.mule.test.marvel.drstrange.DrStrangeErrorTypeDefinition.CUSTOM
 
 import org.mule.runtime.api.streaming.bytes.CursorStream;
 import org.mule.runtime.core.api.util.IOUtils;
-import org.mule.runtime.extension.api.annotation.param.reference.FlowReference;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.extension.api.annotation.param.reference.FlowReference;
+import org.mule.runtime.extension.api.runtime.operation.Result;
+import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 import org.mule.runtime.extension.api.runtime.streaming.PagingProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DrStrangeOperations {
 
   public String seekStream(@Config DrStrange dr, @Optional(defaultValue = PAYLOAD) InputStream stream, int position)
-      throws IOException {
+    throws IOException {
     checkArgument(stream instanceof CursorStream, "Stream was not cursored");
 
     CursorStream cursor = (CursorStream) stream;
@@ -50,6 +52,28 @@ public class DrStrangeOperations {
     }
   }
 
+  @Throws(CustomErrorProvider.class)
+  public void readStreamNonBlocking(@Config DrStrange dr,
+                                    @Optional(defaultValue = PAYLOAD) InputStream stream,
+                                    CompletionCallback<String, Object> callback) throws IOException {
+    try {
+      callback.success(Result.<String, Object>builder().output(IOUtils.toString(stream)).build());
+    } catch (Exception e) {
+      callback.error(new CustomErrorException(e, CUSTOM_ERROR));
+    }
+  }
+
+
+  @Throws(CustomErrorProvider.class)
+  public String fail(@Config DrStrange dr) throws IOException {
+    throw new CustomErrorException(new Exception("aJgfslghsds;k"), CUSTOM_ERROR);
+  }
+
+  @Throws(CustomErrorProvider.class)
+  public void failNonBlocking(@Config DrStrange dr, CompletionCallback<String, Object> callback) throws IOException {
+    callback.error(new CustomErrorException(new Exception("aJgfslghsds;k"), CUSTOM_ERROR));
+  }
+
   public InputStream toStream(@Config DrStrange dr, @Optional(defaultValue = PAYLOAD) String data) {
     return new ByteArrayInputStream(data.getBytes());
   }
@@ -58,7 +82,8 @@ public class DrStrangeOperations {
     throw new RuntimeException();
   }
 
-  public void withFlowReference(@Config DrStrange dr, @FlowReference String flowRef) {}
+  public void withFlowReference(@Config DrStrange dr, @FlowReference String flowRef) {
+  }
 
   public List<String> readObjectStream(@Content Iterator<String> iteratorValues) {
     List<String> objects = new LinkedList<>();

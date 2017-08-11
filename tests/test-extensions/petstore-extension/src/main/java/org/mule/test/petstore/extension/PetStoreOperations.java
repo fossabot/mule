@@ -6,21 +6,30 @@
  */
 package org.mule.test.petstore.extension;
 
+import static org.mule.test.petstore.extension.PetstoreErrorTypeDefinition.PET_ERROR;
+
+import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.security.SecurityException;
 import org.mule.runtime.api.security.SecurityProviderNotFoundException;
 import org.mule.runtime.api.security.UnknownAuthenticationTypeException;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.core.api.util.concurrent.Latch;
 import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
+import org.mule.runtime.extension.api.annotation.error.Throws;
+import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.DefaultEncoding;
 import org.mule.runtime.extension.api.annotation.param.NullSafe;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
-import org.mule.runtime.extension.api.annotation.param.Config;
+import org.mule.runtime.extension.api.client.DefaultOperationParameters;
+import org.mule.runtime.extension.api.client.ExtensionsClient;
+import org.mule.runtime.extension.api.exception.ModuleException;
+import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.security.AuthenticationHandler;
-
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
@@ -28,8 +37,39 @@ import java.util.concurrent.CountDownLatch;
 
 public class PetStoreOperations {
 
+  @Inject
+  private ExtensionsClient client;
+
   public List<String> getPets(@Connection PetStoreClient client, @Config PetStoreConnector config, String ownerName) {
     return client.getPets(ownerName, config);
+  }
+
+  @Throws(PetStoreCustomErrorProvider.class)
+  public String failMv(String config) throws MuleException {
+    ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
+    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
+    //    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
+    try {
+      Result<String, Serializable> execute = client.execute("Marvel", "fail", params2);
+      return execute.getOutput();
+    } catch (Exception e) {
+      throw new ModuleException(PET_ERROR, e);
+    }
+  }
+
+  @Throws(PetStoreCustomErrorProvider.class)
+  public String failMvNonBlocking(String config) throws MuleException {
+    ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
+    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
+    //    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
+    try {
+      Result<Object, Object> r = client.executeAsync("Marvel", "failNonBlocking", params2).get();
+      return r.getOutput().toString();
+    } catch (Exception e) {
+      throw new ModuleException(PET_ERROR, e);
+    }
   }
 
   public PetStoreClient getClient(@Connection PetStoreClient client) {

@@ -13,10 +13,11 @@ import static org.mule.runtime.core.api.context.notification.PipelineMessageNoti
 import static org.mule.runtime.core.api.context.notification.PipelineMessageNotification.PROCESS_END;
 import static org.mule.runtime.core.api.context.notification.PipelineMessageNotification.PROCESS_START;
 import static org.mule.runtime.core.api.processor.MessageProcessors.processToApply;
-import static org.mule.runtime.core.api.util.ExceptionUtils.updateMessagingExceptionWithError;
+import static org.mule.runtime.core.api.util.MessagingExceptionResolver.resolve;
 import static org.mule.runtime.core.internal.util.rx.Operators.requestUnbounded;
 import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.from;
+
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.LifecycleException;
@@ -48,19 +49,15 @@ import org.mule.runtime.core.api.registry.RegistrationException;
 import org.mule.runtime.core.api.source.MessageSource;
 import org.mule.runtime.core.privileged.processor.IdempotentRedeliveryPolicy;
 import org.mule.runtime.core.privileged.processor.chain.DefaultMessageProcessorChainBuilder;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
-
-import org.reactivestreams.Publisher;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Abstract implementation of {@link AbstractFlowConstruct} that allows a list of {@link Processor}s that will be used to process
@@ -195,7 +192,7 @@ public abstract class AbstractPipeline extends AbstractFlowConstruct implements 
                   handleSink.next(event);
                 } catch (RejectedExecutionException ree) {
                   event.getContext()
-                      .error(updateMessagingExceptionWithError(new MessagingException(event, ree, this), this, getMuleContext()));
+                      .error(resolve(this, new MessagingException(event, ree, this), getMuleContext().getErrorTypeLocator()));
                 }
               })
               .flatMap(event -> Mono.from(event.getContext().getResponsePublisher()));

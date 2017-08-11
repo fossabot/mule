@@ -9,12 +9,13 @@ package org.mule.runtime.core.internal.processor.interceptor;
 import static java.lang.String.valueOf;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.mule.runtime.core.api.util.ExceptionUtils.updateMessagingExceptionWithError;
+import static org.mule.runtime.core.api.util.MessagingExceptionResolver.resolve;
 import static org.mule.runtime.core.internal.component.ComponentAnnotations.ANNOTATION_PARAMETERS;
 import static org.mule.runtime.core.internal.interception.DefaultInterceptionEvent.INTERCEPTION_RESOLVED_CONTEXT;
 import static org.mule.runtime.core.internal.interception.DefaultInterceptionEvent.INTERCEPTION_RESOLVED_PARAMS;
 import static reactor.core.publisher.Mono.from;
 import static reactor.core.publisher.Mono.fromFuture;
+
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.exception.MuleRuntimeException;
@@ -34,7 +35,6 @@ import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.processor.ReactiveProcessor;
 import org.mule.runtime.core.internal.interception.DefaultInterceptionEvent;
 import org.mule.runtime.extension.api.runtime.operation.ExecutionContext;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -141,9 +141,8 @@ public class ReactiveInterceptorAdapter
           if (t instanceof MessagingException) {
             throw new CompletionException(t);
           } else {
-            throw new CompletionException(updateMessagingExceptionWithError(new MessagingException(eventWithResolvedParams,
-                                                                                                   t.getCause(), component),
-                                                                            component, muleContext));
+            MessagingException me = new MessagingException(eventWithResolvedParams, t.getCause(), component);
+            throw new CompletionException(resolve(component, me, muleContext.getErrorTypeLocator()));
           }
         })
         .thenApply(interceptedEvent -> ((DefaultInterceptionEvent) interceptedEvent).resolve());
