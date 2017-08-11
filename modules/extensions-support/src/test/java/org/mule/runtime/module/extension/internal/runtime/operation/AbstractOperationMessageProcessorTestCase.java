@@ -271,7 +271,7 @@ public abstract class AbstractOperationMessageProcessorTestCase extends Abstract
     when(configurationModel.getOperationModels()).thenReturn(asList(operationModel));
     when(configurationModel.getOperationModel(OPERATION_NAME)).thenReturn(of(operationModel));
 
-    when(connectionProviderWrapper.getRetryPolicyTemplate()).thenReturn(new NoRetryPolicyTemplate());
+    when(connectionProviderWrapper.getReconnectionConfig()).thenReturn(new NoRetryPolicyTemplate());
 
     mockSubTypes(extensionModel);
     mockClassLoaderModelProperty(extensionModel, getClass().getClassLoader());

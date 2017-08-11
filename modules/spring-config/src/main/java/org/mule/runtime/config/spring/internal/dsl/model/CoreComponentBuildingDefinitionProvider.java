@@ -139,6 +139,7 @@ import org.mule.runtime.core.internal.processor.simple.AddFlowVariableProcessor;
 import org.mule.runtime.core.internal.processor.simple.ParseTemplateProcessor;
 import org.mule.runtime.core.internal.processor.simple.RemoveFlowVariableProcessor;
 import org.mule.runtime.core.internal.processor.simple.SetPayloadMessageProcessor;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
 import org.mule.runtime.core.internal.routing.ChoiceRouter;
 import org.mule.runtime.core.internal.routing.FirstSuccessful;
 import org.mule.runtime.core.internal.routing.Foreach;
@@ -1094,6 +1095,12 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
     buildingDefinitions.add(baseReconnectDefinition.withIdentifier(RECONNECT_ELEMENT_IDENTIFIER)
         .withSetterParameterDefinition("retryNotifier", fromChildConfiguration(RetryNotifier.class).build())
         .withSetterParameterDefinition("count", fromSimpleParameter("count").build()).build());
+
+    buildingDefinitions.add(baseDefinition
+                                .withTypeDefinition(fromType(ReconnectionConfig.class))
+                                .withConstructorParameterDefinition(fromSimpleParameter("failsDeployment").build())
+                                .withConstructorParameterDefinition(fromChildConfiguration(RetryPolicyTemplate.class).build())
+                            .build());
 
     return buildingDefinitions;
   }

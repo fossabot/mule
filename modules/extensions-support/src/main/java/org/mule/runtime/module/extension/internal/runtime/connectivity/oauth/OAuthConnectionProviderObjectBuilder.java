@@ -112,7 +112,7 @@ public class OAuthConnectionProviderObjectBuilder<C> extends DefaultConnectionPr
                                                     config,
                                                     getCallbackValues(),
                                                     oauthManager,
-                                                    retryPolicyTemplate);
+                                                    reconnectionConfig);
     return provider;
   }
 
@@ -133,7 +133,7 @@ public class OAuthConnectionProviderObjectBuilder<C> extends DefaultConnectionPr
                                                     config,
                                                     getCallbackValues(),
                                                     oauthManager,
-                                                    retryPolicyTemplate);
+                                                    reconnectionConfig);
     return new Pair<>(provider, result);
   }
 

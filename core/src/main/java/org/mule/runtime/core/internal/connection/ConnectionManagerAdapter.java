@@ -8,8 +8,8 @@ package org.mule.runtime.core.internal.connection;
 
 import org.mule.runtime.api.config.PoolingProfile;
 import org.mule.runtime.api.connection.ConnectionProvider;
-import org.mule.runtime.core.api.connector.ConnectionManager;
 import org.mule.runtime.api.lifecycle.Stoppable;
+import org.mule.runtime.core.api.connector.ConnectionManager;
 import org.mule.runtime.core.api.retry.policy.RetryPolicy;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
 

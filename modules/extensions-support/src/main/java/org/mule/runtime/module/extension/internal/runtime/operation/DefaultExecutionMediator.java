@@ -228,7 +228,7 @@ public final class DefaultExecutionMediator implements ExecutionMediator {
     if (connectionProviderOptional.isPresent()) {
       final ConnectionProvider connectionProvider = connectionProviderOptional.get();
       if (ConnectionProviderWrapper.class.isAssignableFrom(connectionProvider.getClass())) {
-        return ((ConnectionProviderWrapper) connectionProvider).getRetryPolicyTemplate();
+        return ((ConnectionProviderWrapper) connectionProvider).getReconnectionConfig();
       }
     }
     return connectionManager.getDefaultRetryPolicyTemplate();

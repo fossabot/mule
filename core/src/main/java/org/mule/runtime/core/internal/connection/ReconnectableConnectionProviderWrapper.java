@@ -6,9 +6,13 @@
  */
 package org.mule.runtime.core.internal.connection;
 
+import static java.util.Optional.ofNullable;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
+
+import java.util.Optional;
 
 /**
  * A {@link ConnectionProviderWrapper} which includes a {@link RetryPolicyTemplate}
@@ -21,17 +25,17 @@ import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
  */
 public class ReconnectableConnectionProviderWrapper<C> extends ConnectionProviderWrapper<C> {
 
-  private final RetryPolicyTemplate retryPolicyTemplate;
+  private final ReconnectionConfig reconnectionConfig;
 
   /**
    * Creates a new instance
    *
    * @param delegate the {@link ConnectionProvider} to be wrapped
-   * @param retryPolicyTemplate The {@link RetryPolicyTemplate} for retrying failed connection attempts
+   * @param reconnectionConfig The {@link ReconnectionConfig} for retrying failed connection attempts
    */
-  public ReconnectableConnectionProviderWrapper(ConnectionProvider<C> delegate, RetryPolicyTemplate retryPolicyTemplate) {
+  public ReconnectableConnectionProviderWrapper(ConnectionProvider<C> delegate, ReconnectionConfig reconnectionConfig) {
     super(delegate);
-    this.retryPolicyTemplate = retryPolicyTemplate;
+    this.reconnectionConfig = reconnectionConfig;
   }
 
   /**
@@ -45,11 +49,8 @@ public class ReconnectableConnectionProviderWrapper<C> extends ConnectionProvide
     return getDelegate().validate(connection);
   }
 
-  /**
-   * @return a {@link RetryPolicyTemplate} with the configured values in the Mule Application.
-   */
-  public RetryPolicyTemplate getRetryPolicyTemplate() {
-    return retryPolicyTemplate;
+  @Override
+  public Optional<ReconnectionConfig> getReconnectionConfig() {
+    return ofNullable(reconnectionConfig);
   }
-
 }

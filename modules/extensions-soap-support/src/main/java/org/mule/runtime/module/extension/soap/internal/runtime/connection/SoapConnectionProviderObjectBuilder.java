@@ -73,8 +73,8 @@ public final class SoapConnectionProviderObjectBuilder extends ConnectionProvide
     MessageDispatcherProvider<? extends MessageDispatcher> transport = getCustomTransport(result);
     ConnectionProvider<ForwardingSoapClient> provider =
         new ForwardingSoapClientConnectionProvider(serviceProvider, transport, muleContext);
-    provider = new ReconnectableConnectionProviderWrapper<>(provider, retryPolicyTemplate);
-    provider = new ErrorTypeHandlerConnectionProviderWrapper<>(provider, muleContext, extensionModel, retryPolicyTemplate);
+    provider = new ReconnectableConnectionProviderWrapper<>(provider, reconnectionConfig);
+    provider = new ErrorTypeHandlerConnectionProviderWrapper<>(provider, muleContext, extensionModel, reconnectionConfig);
     return new Pair(provider, result);
   }
 

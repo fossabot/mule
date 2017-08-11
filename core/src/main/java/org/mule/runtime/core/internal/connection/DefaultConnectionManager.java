@@ -26,6 +26,7 @@ import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.connector.ConnectionManager;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
 import org.mule.runtime.core.api.retry.policy.NoRetryPolicyTemplate;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 
 import java.util.HashMap;
@@ -54,6 +55,7 @@ public final class DefaultConnectionManager implements ConnectionManagerAdapter,
   private final Lock writeLock = readWriteLock.writeLock();
   private final MuleContext muleContext;
   private final RetryPolicyTemplate retryPolicyTemplate;
+  private final ReconnectionConfig defaultReconnectionConfig;
   private final PoolingProfile defaultPoolingProfile;
   private final ConnectionManagementStrategyFactory managementStrategyFactory;
 
@@ -67,6 +69,7 @@ public final class DefaultConnectionManager implements ConnectionManagerAdapter,
     this.muleContext = muleContext;
     this.defaultPoolingProfile = new PoolingProfile();
     this.retryPolicyTemplate = new NoRetryPolicyTemplate();
+    defaultReconnectionConfig = ReconnectionConfig.getDefault();
     managementStrategyFactory = new ConnectionManagementStrategyFactory(defaultPoolingProfile, muleContext);
   }
 
@@ -102,7 +105,7 @@ public final class DefaultConnectionManager implements ConnectionManagerAdapter,
   @Override
   public <C> RetryPolicyTemplate getRetryTemplateFor(ConnectionProvider<C> connectionProvider) {
     return connectionProvider instanceof ConnectionProviderWrapper
-        ? ((ConnectionProviderWrapper) connectionProvider).getRetryPolicyTemplate()
+        ? ((ConnectionProviderWrapper) connectionProvider).getReconnectionConfig()
         : getDefaultRetryPolicyTemplate();
   }
 
