@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DrStrangeOperations {
 
   public String seekStream(@Config DrStrange dr, @Optional(defaultValue = PAYLOAD) InputStream stream, int position)
-    throws IOException {
+      throws IOException {
     checkArgument(stream instanceof CursorStream, "Stream was not cursored");
 
     CursorStream cursor = (CursorStream) stream;
@@ -55,7 +55,8 @@ public class DrStrangeOperations {
   @Throws(CustomErrorProvider.class)
   public void readStreamNonBlocking(@Config DrStrange dr,
                                     @Optional(defaultValue = PAYLOAD) InputStream stream,
-                                    CompletionCallback<String, Object> callback) throws IOException {
+                                    CompletionCallback<String, Object> callback)
+      throws IOException {
     try {
       callback.success(Result.<String, Object>builder().output(IOUtils.toString(stream)).build());
     } catch (Exception e) {
@@ -82,8 +83,7 @@ public class DrStrangeOperations {
     throw new RuntimeException();
   }
 
-  public void withFlowReference(@Config DrStrange dr, @FlowReference String flowRef) {
-  }
+  public void withFlowReference(@Config DrStrange dr, @FlowReference String flowRef) {}
 
   public List<String> readObjectStream(@Content Iterator<String> iteratorValues) {
     List<String> objects = new LinkedList<>();

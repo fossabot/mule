@@ -293,9 +293,10 @@ public class HeisenbergOperations implements Disposable {
 
   public String readMarvelStream(String config) throws MuleException {
     ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
-    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params =
+        DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
     DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
-//    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
+    //    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
     Result<String, Serializable> execute = client.execute("Marvel", "fail", params2);
     return execute.getOutput();
   }

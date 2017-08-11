@@ -40,7 +40,8 @@ public class ErrorTypesTestCase extends AbstractExtensionFunctionalTestCase {
   public void previousError222() throws Exception {
     MessagingException error = flowRunner("previousConnectorError2").runExpectingException();
     ErrorType errorType = error.getEvent().getError().get().getErrorType();
-    assertThat(errorType.getNamespace(), is("MARVEL"));  }
+    assertThat(errorType.getNamespace(), is("MARVEL"));
+  }
 
   @Test
   public void previousError333() throws Exception {

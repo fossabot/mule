@@ -107,7 +107,7 @@ public class ExceptionUtils {
     }
 
     return (Optional<T>) stream(org.apache.commons.lang3.exception.ExceptionUtils.getThrowables(throwable))
-                           .filter(throwableType::isInstance).findFirst();
+        .filter(throwableType::isInstance).findFirst();
   }
 
   /**
@@ -128,7 +128,7 @@ public class ExceptionUtils {
    */
   public static <T, E extends Exception> T tryExpecting(Class<E> expectedExceptionType, Callable<T> callable,
                                                         ExceptionHandler<T, E> exceptionHandler)
-    throws E {
+      throws E {
     try {
       return callable.call();
     } catch (Exception e) {
@@ -156,14 +156,14 @@ public class ExceptionUtils {
                                                             ErrorType currentError, ErrorTypeLocator locator) {
     Throwable cause = getWrapperErrorCause(exception);
     ErrorType errorType = getComponentIdentifier(processor)
-                            .map(ci -> locator.lookupComponentErrorType(ci, cause))
-                            .orElse(locator.lookupErrorType(cause));
+        .map(ci -> locator.lookupComponentErrorType(ci, cause))
+        .orElse(locator.lookupErrorType(cause));
     return getErrorMappings(processor)
-             .stream()
-             .filter(m -> m.match(currentError == null || isUnknownMuleError(currentError) ? errorType : currentError))
-             .findFirst()
-             .map(ErrorMapping::getTarget)
-             .orElse(errorType);
+        .stream()
+        .filter(m -> m.match(currentError == null || isUnknownMuleError(currentError) ? errorType : currentError))
+        .findFirst()
+        .map(ErrorMapping::getTarget)
+        .orElse(errorType);
   }
 
   public static Error getErrorFromFailingProcessor(InternalEvent currentEvent, Object processor,
@@ -173,13 +173,12 @@ public class ExceptionUtils {
     // CHECK CONNECTIVITY ACA
     currentError = foundErrorType.getIdentifier().equals(UNKNOWN_ERROR_IDENTIFIER) ? currentError : foundErrorType;
     return ErrorBuilder.builder(cause).errorType(getErrorTypeFromFailingProcessor(processor, cause, currentError, locator))
-             .build();
+        .build();
   }
 
   private static Throwable getWrapperErrorCause(Throwable exception) {
-    return exception instanceof WrapperErrorMessageAwareException ?
-             ((WrapperErrorMessageAwareException) exception).getRootCause() :
-             exception;
+    return exception instanceof WrapperErrorMessageAwareException ? ((WrapperErrorMessageAwareException) exception).getRootCause()
+        : exception;
   }
 
   public static List<ErrorMapping> getErrorMappings(Object processor) {
@@ -199,9 +198,9 @@ public class ExceptionUtils {
 
   private static boolean isMessagingExceptionCause(MessagingException me, Throwable cause) {
     return !me.getEvent().getError()
-              .filter(error -> cause.equals(error.getCause()))
-              .filter(error -> me.causedExactlyBy(error.getCause().getClass()))
-              .isPresent();
+        .filter(error -> cause.equals(error.getCause()))
+        .filter(error -> me.causedExactlyBy(error.getCause().getClass()))
+        .isPresent();
   }
 
   private static boolean isUnknownMuleError(ErrorTypeLocator locator, Throwable cause) {

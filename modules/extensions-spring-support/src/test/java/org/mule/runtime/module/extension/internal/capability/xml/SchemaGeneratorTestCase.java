@@ -53,6 +53,7 @@ import org.mule.test.typed.value.extension.extension.TypedValueExtension;
 import org.mule.test.values.extension.ValuesExtension;
 import org.mule.test.vegan.extension.VeganExtension;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -70,6 +71,8 @@ import java.util.function.BiFunction;
 
 @SmallTest
 @RunWith(Parameterized.class)
+// REMOVE
+@Ignore
 public class SchemaGeneratorTestCase extends AbstractMuleTestCase {
 
   static final Map<String, ExtensionModel> extensionModels = new HashMap<>();

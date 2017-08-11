@@ -47,7 +47,8 @@ public class PetStoreOperations {
   @Throws(PetStoreCustomErrorProvider.class)
   public String failMv(String config) throws MuleException {
     ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
-    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params =
+        DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
     DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
     //    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
     try {
@@ -61,7 +62,8 @@ public class PetStoreOperations {
   @Throws(PetStoreCustomErrorProvider.class)
   public String failMvNonBlocking(String config) throws MuleException {
     ByteArrayInputStream is = new ByteArrayInputStream("adfas".getBytes());
-    DefaultOperationParameters params = DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
+    DefaultOperationParameters params =
+        DefaultOperationParameters.builder().addParameter("stream", is).configName(config).build();
     DefaultOperationParameters params2 = DefaultOperationParameters.builder().configName(config).build();
     //    Result<String, Serializable> execute = client.execute("Marvel", "readStream", params);
     try {

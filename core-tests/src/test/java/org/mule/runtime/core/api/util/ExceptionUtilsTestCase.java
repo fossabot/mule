@@ -104,7 +104,7 @@ public class ExceptionUtilsTestCase extends AbstractMuleTestCase {
   @Test
   public void extractRootConnectionException() {
     Exception withConnectionExceptionCause =
-      new Exception(new ConnectionException(ERROR_MESSAGE, new ConnectionException(new NullPointerException())));
+        new Exception(new ConnectionException(ERROR_MESSAGE, new ConnectionException(new NullPointerException())));
     Optional<ConnectionException> connectionException = extractConnectionException(withConnectionExceptionCause);
     assertThat(connectionException.isPresent(), is(true));
     assertThat(connectionException.get().getMessage(), is(ERROR_MESSAGE));
@@ -153,39 +153,39 @@ public class ExceptionUtilsTestCase extends AbstractMuleTestCase {
     //    verify(messagingExceptionMock, atLeast(1)).setProcessedEvent(any(InternalEvent.class));
   }
 
-    @Test
-    public void updateMessaginExceptionWithError() {
-      MessagingException messagingExceptionMock = mock(MessagingException.class);
-      Processor processorMock = mock(Processor.class);
-      MuleContext muleContextMock = mock(MuleContext.class);
-      ErrorTypeLocator errorTypeLocatorMock = mock(ErrorTypeLocator.class);
+  @Test
+  public void updateMessaginExceptionWithError() {
+    MessagingException messagingExceptionMock = mock(MessagingException.class);
+    Processor processorMock = mock(Processor.class);
+    MuleContext muleContextMock = mock(MuleContext.class);
+    ErrorTypeLocator errorTypeLocatorMock = mock(ErrorTypeLocator.class);
 
-      InternalEvent eventMock = mock(InternalEvent.class);
-      FlowCallStack flowCallStackMock = mock(FlowCallStack.class);
-      Message messageMock = mock(Message.class);
-      InternalEventContext eventContextMock = mock(InternalEventContext.class);
-      when(eventContextMock.getOriginatingLocation()).thenReturn(TEST_CONNECTOR_LOCATION);
+    InternalEvent eventMock = mock(InternalEvent.class);
+    FlowCallStack flowCallStackMock = mock(FlowCallStack.class);
+    Message messageMock = mock(Message.class);
+    InternalEventContext eventContextMock = mock(InternalEventContext.class);
+    when(eventContextMock.getOriginatingLocation()).thenReturn(TEST_CONNECTOR_LOCATION);
 
-      Error errorMock = mock(Error.class);
-      Optional<Error> errorOptional = Optional.ofNullable(errorMock);
+    Error errorMock = mock(Error.class);
+    Optional<Error> errorOptional = Optional.ofNullable(errorMock);
 
-      when(messagingExceptionMock.getEvent()).thenReturn(eventMock);
+    when(messagingExceptionMock.getEvent()).thenReturn(eventMock);
 
-      when(eventMock.getError()).thenReturn(errorOptional);
-      when(eventMock.getFlowCallStack()).thenReturn(flowCallStackMock);
-      when(eventMock.getMessage()).thenReturn(messageMock);
-      when(eventMock.getContext()).thenReturn(eventContextMock);
+    when(eventMock.getError()).thenReturn(errorOptional);
+    when(eventMock.getFlowCallStack()).thenReturn(flowCallStackMock);
+    when(eventMock.getMessage()).thenReturn(messageMock);
+    when(eventMock.getContext()).thenReturn(eventContextMock);
 
-      when(eventContextMock.getId()).thenReturn("someid");
+    when(eventContextMock.getId()).thenReturn("someid");
 
-      when(muleContextMock.getErrorTypeLocator()).thenReturn(errorTypeLocatorMock);
+    when(muleContextMock.getErrorTypeLocator()).thenReturn(errorTypeLocatorMock);
 
-      ErrorType errorType = mock(ErrorType.class);
-      when(errorType.getIdentifier()).thenReturn("ID");
-      when(errorTypeLocatorMock.lookupErrorType(messagingExceptionMock)).thenReturn(errorType);
+    ErrorType errorType = mock(ErrorType.class);
+    when(errorType.getIdentifier()).thenReturn("ID");
+    when(errorTypeLocatorMock.lookupErrorType(messagingExceptionMock)).thenReturn(errorType);
 
-      resolve(processorMock, messagingExceptionMock, muleContextMock.getErrorTypeLocator());
+    resolve(processorMock, messagingExceptionMock, muleContextMock.getErrorTypeLocator());
 
-//      verify(messagingExceptionMock, times(0)).setProcessedEvent(any(InternalEvent.class));
-    }
+    //      verify(messagingExceptionMock, times(0)).setProcessedEvent(any(InternalEvent.class));
+  }
 }

@@ -29,10 +29,10 @@ import java.util.Optional;
 public class MessagingExceptionResolver {
 
   public static MessagingException resolveWithError(MessagingException me, Processor failing, MuleContext context) {
-//    // If Event already has Error, for example because of an interceptor then conserve existing Error instance
-//    if (!me.getEvent().getError().isPresent()) {
-//      me.setProcessedEvent(createErrorEvent(me.getEvent(), failing, me, context.getErrorTypeLocator()));
-//    }
+    //    // If Event already has Error, for example because of an interceptor then conserve existing Error instance
+    //    if (!me.getEvent().getError().isPresent()) {
+    //      me.setProcessedEvent(createErrorEvent(me.getEvent(), failing, me, context.getErrorTypeLocator()));
+    //    }
     return enrich(me, failing, me.getEvent(), context);
   }
 
@@ -59,11 +59,11 @@ public class MessagingExceptionResolver {
     ErrorType rootErrorType = first.getValue();
     Processor failingProcessor = getFailingProcessor(me, root).orElse(failing);
     ErrorType errorType = getErrorMappings(failing)
-                            .stream()
-                            .filter(m -> m.match(rootErrorType))
-                            .findFirst()
-                            .map(ErrorMapping::getTarget)
-                            .orElse(rootErrorType);
+        .stream()
+        .filter(m -> m.match(rootErrorType))
+        .findFirst()
+        .map(ErrorMapping::getTarget)
+        .orElse(rootErrorType);
 
     Error error = ErrorBuilder.builder(getMessagingExceptionCause(root).orElse(root)).errorType(errorType).build();
     InternalEvent event = InternalEvent.builder(me.getEvent()).error(error).build();
@@ -96,14 +96,14 @@ public class MessagingExceptionResolver {
   }
 
   private static ErrorType errorTypeFromException(ErrorTypeLocator locator, Throwable e) {
-    return isMessagingExceptionWithError(e) ?
-                ((MessagingException) e).getEvent().getError().get().getErrorType() : locator.lookupErrorType(e);
+    return isMessagingExceptionWithError(e) ? ((MessagingException) e).getEvent().getError().get().getErrorType()
+        : locator.lookupErrorType(e);
   }
 
   private static boolean isMessagingExceptionWithError(Throwable cause) {
     return cause instanceof MessagingException
-             && ((MessagingException) cause).getEvent().getError().isPresent()
-             && ((MessagingException) cause).getFailingMessageProcessor() != null;
+        && ((MessagingException) cause).getEvent().getError().isPresent()
+        && ((MessagingException) cause).getFailingMessageProcessor() != null;
   }
 
   private static MessagingException enrich(MessagingException me, Processor failing, InternalEvent event, MuleContext context) {

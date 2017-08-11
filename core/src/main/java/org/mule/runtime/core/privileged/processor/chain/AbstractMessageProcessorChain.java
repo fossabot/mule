@@ -168,8 +168,9 @@ abstract class AbstractMessageProcessorChain extends AbstractAnnotatedObject imp
         .transform(next)
         .onErrorResume(RejectedExecutionException.class,
                        throwable -> Mono.from(event.getContext()
-                                                .error(resolve(processor, new MessagingException(event, throwable, processor), muleContext.getErrorTypeLocator())))
-                                      .then(Mono.empty()))
+                           .error(resolve(processor, new MessagingException(event, throwable, processor),
+                                          muleContext.getErrorTypeLocator())))
+                           .then(Mono.empty()))
         .onErrorResume(MessagingException.class,
                        throwable -> {
                          if (!throwable.getEvent().getError().isPresent()) {
