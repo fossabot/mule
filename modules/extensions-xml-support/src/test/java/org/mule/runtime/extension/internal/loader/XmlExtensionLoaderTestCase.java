@@ -8,13 +8,14 @@ package org.mule.runtime.extension.internal.loader;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mule.runtime.api.dsl.DslResolvingContext.getDefault;
 import static org.mule.runtime.extension.api.ExtensionConstants.TARGET_OUTPUT_PARAMETER_DESCRIPTION;
-import static org.mule.runtime.extension.api.ExtensionConstants.TARGET_TYPE_PARAMETER_NAME;
 import static org.mule.runtime.extension.api.ExtensionConstants.TARGET_PARAMETER_DESCRIPTION;
 import static org.mule.runtime.extension.api.ExtensionConstants.TARGET_PARAMETER_NAME;
+import static org.mule.runtime.extension.api.ExtensionConstants.TARGET_TYPE_PARAMETER_NAME;
 import static org.mule.runtime.extension.internal.loader.XmlExtensionLoaderDelegate.CONFIG_NAME;
 import static org.mule.runtime.extension.internal.loader.XmlExtensionModelLoader.RESOURCE_XML;
 import org.junit.Test;
@@ -24,10 +25,12 @@ import org.mule.metadata.api.model.StringType;
 import org.mule.runtime.api.meta.MuleVersion;
 import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.api.meta.model.config.ConfigurationModel;
+import org.mule.runtime.api.meta.model.error.ErrorModelBuilder;
 import org.mule.runtime.api.meta.model.operation.OperationModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterModel;
 import org.mule.runtime.config.spring.internal.dsl.model.extension.xml.GlobalElementComponentModelModelProperty;
 import org.mule.runtime.config.spring.internal.dsl.model.extension.xml.OperationComponentModelModelProperty;
+import org.mule.runtime.core.api.exception.Errors;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.mule.tck.junit4.AbstractMuleTestCase;
 
@@ -70,6 +73,7 @@ public class XmlExtensionLoaderTestCase extends AbstractMuleTestCase {
     assertThat(operationModel.getOutput().getType(), instanceOf(StringType.class));
     assertThat(operationModel.getOutputAttributes().getType().getMetadataFormat(), is(MetadataFormat.JAVA));
     assertThat(operationModel.getOutputAttributes().getType(), instanceOf(StringType.class));
+    assertThat(operationModel.getErrorModels().size(), is(0));
   }
 
   @Test
@@ -306,6 +310,20 @@ public class XmlExtensionLoaderTestCase extends AbstractMuleTestCase {
 
     assertThat(operationModel.getOutput().getDescription(), is("Documentation for the output"));
     assertThat(operationModel.getOutputAttributes().getDescription(), is("Documentation for the output attributes"));
+    assertThat(operationModel.getErrorModels().size(), is(2));
+    assertThat(operationModel.getErrorModels(),
+               containsInAnyOrder(
+                                  ErrorModelBuilder.newError("CUSTOM_ERROR_HERE", extensionModel
+                                      .getXmlDslModel().getPrefix().toUpperCase())
+                                      .withParent(ErrorModelBuilder
+                                          .newError(Errors.ComponentIdentifiers.ANY).build())
+                                      .build(),
+                                  ErrorModelBuilder
+                                      .newError("ANOTHER_CUSTOM_ERROR_HERE", extensionModel
+                                          .getXmlDslModel().getPrefix().toUpperCase())
+                                      .withParent(ErrorModelBuilder
+                                          .newError(Errors.ComponentIdentifiers.ANY).build())
+                                      .build()));
 
     Optional<OperationComponentModelModelProperty> modelProperty =
         operationModel.getModelProperty(OperationComponentModelModelProperty.class);
