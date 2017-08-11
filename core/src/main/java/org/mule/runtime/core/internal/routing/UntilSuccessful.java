@@ -117,7 +117,7 @@ public class UntilSuccessful extends AbstractMuleObjectOwner implements Router {
 
   private Function<Throwable, Throwable> getThrowableFunction(InternalEvent event) {
     return throwable -> {
-      Throwable cause = getMessagingExceptionCause(throwable).orElse(throwable);
+      Throwable cause = getMessagingExceptionCause(throwable);
       return new MessagingException(event,
                                     new RetryPolicyExhaustedException(createStaticMessage(UNTIL_SUCCESSFUL_MSG_PREFIX,
                                                                                           cause.getMessage()),

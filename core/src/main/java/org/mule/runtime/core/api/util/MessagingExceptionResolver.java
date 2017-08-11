@@ -7,11 +7,16 @@
 
 package org.mule.runtime.core.api.util;
 
+import static java.util.stream.Collectors.toList;
 import static org.mule.runtime.api.exception.ExceptionHelper.getExceptionsAsList;
 import static org.mule.runtime.core.api.context.notification.EnrichedNotificationInfo.createInfo;
+import static org.mule.runtime.core.api.util.ExceptionUtils.createErrorEvent;
+import static org.mule.runtime.core.api.util.ExceptionUtils.getComponentIdentifier;
 import static org.mule.runtime.core.api.util.ExceptionUtils.getErrorMappings;
 import static org.mule.runtime.core.api.util.ExceptionUtils.getMessagingExceptionCause;
+import static org.mule.runtime.core.api.util.ExceptionUtils.isUnknownMuleError;
 
+import org.mule.runtime.api.component.ComponentIdentifier;
 import org.mule.runtime.api.message.Error;
 import org.mule.runtime.api.message.ErrorType;
 import org.mule.runtime.core.api.InternalEvent;
@@ -22,8 +27,8 @@ import org.mule.runtime.core.api.exception.MessagingException;
 import org.mule.runtime.core.api.message.ErrorBuilder;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.internal.exception.ErrorMapping;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 public class MessagingExceptionResolver {
@@ -40,32 +45,31 @@ public class MessagingExceptionResolver {
    * Resolves a new {@link MessagingException} to be thrown based on the content of the {@code me} parameter and the chain of
    * causes inside it.
    *
-   * @param failing    the failing processor
-   * @param me         the me to update based on it's content
+   * @param processor  the failing processor
+   * @param me         the {@link MessagingException} to update based on it's content
    * @param locator    the error type locator
    * @return a {@link MessagingException} with the proper {@link Error} associated to it's {@link InternalEvent}
    */
-  public static MessagingException resolve(Processor failing,
-                                           MessagingException me,
-                                           ErrorTypeLocator locator) {
-    Map<Throwable, ErrorType> errors = collectErrors(me, locator);
+  public static MessagingException resolve(Processor processor, MessagingException me, ErrorTypeLocator locator) {
+    Optional<Pair<Throwable, ErrorType>> rootCause = findRoot(processor, me, locator);
 
-    if (errors.isEmpty()) {
+    if (!rootCause.isPresent()) {
+      me.setProcessedEvent(createErrorEvent(me.getEvent(), processor, me, locator));
       return me;
     }
 
-    Map.Entry<Throwable, ErrorType> first = errors.entrySet().iterator().next();
-    Throwable root = first.getKey();
-    ErrorType rootErrorType = first.getValue();
-    Processor failingProcessor = getFailingProcessor(me, root).orElse(failing);
-    ErrorType errorType = getErrorMappings(failing)
+    Throwable root = rootCause.get().getFirst();
+    ErrorType rootErrorType = rootCause.get().getSecond();
+    Processor failingProcessor = getFailingProcessor(me, root).orElse(processor);
+
+    ErrorType errorType = getErrorMappings(processor)
         .stream()
         .filter(m -> m.match(rootErrorType))
         .findFirst()
         .map(ErrorMapping::getTarget)
         .orElse(rootErrorType);
 
-    Error error = ErrorBuilder.builder(getMessagingExceptionCause(root).orElse(root)).errorType(errorType).build();
+    Error error = ErrorBuilder.builder(getMessagingExceptionCause(root)).errorType(errorType).build();
     InternalEvent event = InternalEvent.builder(me.getEvent()).error(error).build();
 
     if (root instanceof MessagingException) {
@@ -84,20 +88,36 @@ public class MessagingExceptionResolver {
     return Optional.ofNullable(failingProcessor);
   }
 
-  private static Map<Throwable, ErrorType> collectErrors(MessagingException me, ErrorTypeLocator locator) {
-    LinkedHashMap<Throwable, ErrorType> errors = new LinkedHashMap<>();
+
+  private static Optional<Pair<Throwable, ErrorType>> findRoot(Object p, MessagingException me, ErrorTypeLocator locator) {
+    List<Pair<Throwable, ErrorType>> errors = collectErrors(p, me, locator);
+    if (errors.isEmpty()) {
+      return Optional.empty();
+    }
+    ErrorType rootType = errors.get(0).getSecond();
+    // Get the last exception with the same type as the root
+    List<Pair<Throwable, ErrorType>> filtered = errors.stream().filter(e -> e.getSecond().equals(rootType)).collect(toList());
+    return Optional.ofNullable(filtered.get(filtered.size() - 1));
+  }
+
+  private static List<Pair<Throwable, ErrorType>> collectErrors(Object p, MessagingException me, ErrorTypeLocator locator) {
+    List<Pair<Throwable, ErrorType>> errors = new LinkedList<>();
     getExceptionsAsList(me).forEach(e -> {
-      ErrorType type = errorTypeFromException(locator, e);
-      if (!type.getIdentifier().equals("UNKNOWN")) {
-        errors.put(e, type);
+      ErrorType type = errorTypeFromException(p, locator, e);
+      if (!isUnknownMuleError(type)) {
+        errors.add(new Pair<>(e, type));
       }
     });
     return errors;
   }
 
-  private static ErrorType errorTypeFromException(ErrorTypeLocator locator, Throwable e) {
-    return isMessagingExceptionWithError(e) ? ((MessagingException) e).getEvent().getError().get().getErrorType()
-        : locator.lookupErrorType(e);
+  private static ErrorType errorTypeFromException(Object processor, ErrorTypeLocator locator, Throwable e) {
+    if (isMessagingExceptionWithError(e)) {
+      return ((MessagingException) e).getEvent().getError().get().getErrorType();
+    } else {
+      Optional<ComponentIdentifier> componentIdentifier = getComponentIdentifier(processor);
+      return componentIdentifier.map(ci -> locator.lookupComponentErrorType(ci, e)).orElse(locator.lookupErrorType(e));
+    }
   }
 
   private static boolean isMessagingExceptionWithError(Throwable cause) {

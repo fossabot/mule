@@ -171,7 +171,7 @@ public class ExceptionUtils {
     ErrorType currentError = currentEvent != null ? currentEvent.getError().map(Error::getErrorType).orElse(null) : null;
     ErrorType foundErrorType = locator.lookupErrorType(cause);
     // CHECK CONNECTIVITY ACA
-    currentError = foundErrorType.getIdentifier().equals(UNKNOWN_ERROR_IDENTIFIER) ? currentError : foundErrorType;
+    currentError = isUnknownMuleError(foundErrorType) ? currentError : foundErrorType;
     return ErrorBuilder.builder(cause).errorType(getErrorTypeFromFailingProcessor(processor, cause, currentError, locator))
         .build();
   }
@@ -189,9 +189,9 @@ public class ExceptionUtils {
     return emptyList();
   }
 
-  private static Optional<ComponentIdentifier> getComponentIdentifier(Object processor) {
+  public static Optional<ComponentIdentifier> getComponentIdentifier(Object processor) {
     if (AnnotatedObject.class.isAssignableFrom(processor.getClass())) {
-      return Optional.of((ComponentIdentifier) ((AnnotatedObject) processor).getAnnotation(ANNOTATION_NAME));
+      return Optional.ofNullable((ComponentIdentifier) ((AnnotatedObject) processor).getAnnotation(ANNOTATION_NAME));
     }
     return empty();
   }
@@ -203,11 +203,7 @@ public class ExceptionUtils {
         .isPresent();
   }
 
-  private static boolean isUnknownMuleError(ErrorTypeLocator locator, Throwable cause) {
-    return isUnknownMuleError(locator.lookupErrorType(cause));
-  }
-
-  private static boolean isUnknownMuleError(ErrorType type) {
+  public static boolean isUnknownMuleError(ErrorType type) {
     return type.getIdentifier().equals(UNKNOWN_ERROR_IDENTIFIER);
   }
 
@@ -263,11 +259,11 @@ public class ExceptionUtils {
    * @param exception candidate exception
    * @return cause exception.
    */
-  public static Optional<Throwable> getMessagingExceptionCause(Throwable exception) {
+  public static Throwable getMessagingExceptionCause(Throwable exception) {
     Throwable cause = exception;
     while (cause instanceof MessagingException) {
       cause = cause.getCause();
     }
-    return Optional.ofNullable(cause);
+    return cause != null ? cause : exception;
   }
 }

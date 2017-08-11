@@ -82,6 +82,7 @@ public class ErrorTypeLocatorFactory {
             .addExceptionMapping(StreamingBufferSizeExceededException.class,
                                  errorTypeRepository.lookupErrorType(STREAM_MAXIMUM_SIZE_EXCEEDED).get())
             .addExceptionMapping(MuleFatalException.class, errorTypeRepository.getErrorType(FATAL).get())
+            .addExceptionMapping(LinkageError.class, errorTypeRepository.getErrorType(FATAL).get())
             .build())
         .defaultError(unknown)
         .build();
