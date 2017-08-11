@@ -120,8 +120,7 @@ public class ServiceDescriptorFactory implements ArtifactDescriptorFactory<Servi
     }
   }
 
-  private ServiceDescriptor createArtifactDescriptor(String name)
-  {
+  private ServiceDescriptor createArtifactDescriptor(String name) {
     return new ServiceDescriptor(name);
   }
 

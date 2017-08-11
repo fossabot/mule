@@ -29,28 +29,22 @@ import org.mule.tools.api.packager.ContentGenerator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Creates Service files.
  */
 public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileBuilder> {
 
-
-  // TODO(pablo.kraan): deployment - clean up
+  // TODO(pablo.kraan): deployment - most of this code can be shared with the DeployableFileBuilder class, but it must go in the artifact module
   private static final String META_INF = "META-INF";
-  public static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR = "classloader-model.json";
-  public static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR_LOCATION =
-    Paths.get("META-INF", "mule-artifact", CLASSLOADER_MODEL_JSON_DESCRIPTOR).toString();
-  public static final String MULE_PLUGIN_CLASSIFIER = "mule-plugin";
-  public static final String EXTENSION_BUNDLE_TYPE = "jar";
-  public static final String MULE_ARTIFACT = "mule-artifact";
-  private Properties properties = new Properties();
-  // TODO(pablo.kraan): deployment - need lightway package?
+  private static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR = "classloader-model.json";
+  private static final String CLASSLOADER_MODEL_JSON_DESCRIPTOR_LOCATION =
+      Paths.get("META-INF", "mule-artifact", CLASSLOADER_MODEL_JSON_DESCRIPTOR).toString();
+  private static final String MULE_ARTIFACT = "mule-artifact";
+
   private boolean useHeavyPackage = true;
   private String serviceProviderClassName;
 
@@ -70,22 +64,6 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
    */
   public ServiceFileBuilder(ServiceFileBuilder source) {
     super(source);
-  }
-
-  /**
-   * Create a new builder from another instance and different ID.
-   *
-   * @param id artifact identifier. Non empty.
-   * @param source instance used as template to build the new one. Non null.
-   */
-  public ServiceFileBuilder(String id, ServiceFileBuilder source) {
-    super(id, source);
-    this.properties.putAll(source.properties);
-  }
-
-  @Override
-  protected String getFileExtension() {
-    return ".zip";
   }
 
   @Override
@@ -115,22 +93,12 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
       customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactFile().getAbsolutePath(),
                                                    Paths.get(REPOSITORY_FOLDER,
                                                              dependencyFileBuilder.getArtifactFileRepositoryPath())
-                                                     .toString()));
+                                                       .toString()));
 
-      // TODO(pablo.kraan): deployment - remove plugins from here
-      if (useHeavyPackage && MULE_PLUGIN_CLASSIFIER.equals(dependencyFileBuilder.getClassifier())) {
-        File pluginClassLoaderModel = createClassLoaderModelJsonFile(dependencyFileBuilder);
-        customResources.add(new ZipUtils.ZipResource(pluginClassLoaderModel.getAbsolutePath(),
-                                                     Paths.get(REPOSITORY_FOLDER,
-                                                               dependencyFileBuilder.getArtifactFileRepositoryFolderPath(),
-                                                               CLASSLOADER_MODEL_JSON_DESCRIPTOR)
+      customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactPomFile().getAbsolutePath(),
+                                                   Paths.get(REPOSITORY_FOLDER,
+                                                             dependencyFileBuilder.getArtifactFilePomRepositoryPath())
                                                        .toString()));
-      } else {
-        customResources.add(new ZipUtils.ZipResource(dependencyFileBuilder.getArtifactPomFile().getAbsolutePath(),
-                                                     Paths.get(REPOSITORY_FOLDER,
-                                                               dependencyFileBuilder.getArtifactFilePomRepositoryPath())
-                                                       .toString()));
-      }
     }
 
     if (useHeavyPackage) {
@@ -149,16 +117,7 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
     serviceDescriptor.deleteOnExit();
     MuleServiceModelBuilder serviceModelBuilder = new MuleServiceModelBuilder();
     serviceModelBuilder.setName(getArtifactId()).setMinMuleVersion("4.0.0");
-    //domain.ifPresent(serviceModelBuilder::setDomain);
-    //redeploymentEnabled.ifPresent(serviceModelBuilder::setRedeploymentEnabled);
-    //configResources.ifPresent(configs -> {
-    //  String[] configFiles = configs.split(",");
-    //  serviceModelBuilder.setConfigs(asList(configFiles));
-    //});
     serviceModelBuilder.withClassLoaderModelDescriber().setId(MAVEN);
-    //exportedResources.ifPresent(resources -> {
-    //  serviceModelBuilder.withClassLoaderModelDescriber().addProperty(EXPORTED_RESOURCES, resources.split(","));
-    //});
     serviceModelBuilder.withBundleDescriptorLoader(new MuleArtifactLoaderDescriptor(MAVEN, emptyMap()));
     serviceModelBuilder.withServiceProviderClassName(serviceProviderClassName);
     String serviceDescriptorContent = new MuleServiceModelJsonSerializer().serialize(serviceModelBuilder.build());
@@ -168,33 +127,6 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
       throw new MuleRuntimeException(e);
     }
     return serviceDescriptor;
-  }
-
-  private File createClassLoaderModelJsonFile(AbstractDependencyFileBuilder dependencyFileBuilder) {
-    ArtifactCoordinates artifactCoordinates =
-      new ArtifactCoordinates(dependencyFileBuilder.getGroupId(), dependencyFileBuilder.getArtifactId(),
-                              dependencyFileBuilder.getVersion(), dependencyFileBuilder.getType(),
-                              dependencyFileBuilder.getClassifier());
-    ClassLoaderModel classLoaderModel = new ClassLoaderModel("1.0", artifactCoordinates);
-
-    List<org.mule.tools.api.classloader.model.Artifact> artifactDependencies = new LinkedList<>();
-    List<AbstractDependencyFileBuilder> dependencies = dependencyFileBuilder.getDependencies();
-    for (AbstractDependencyFileBuilder fileBuilderDependency : dependencies) {
-      artifactDependencies.add(getArtifact(fileBuilderDependency));
-    }
-
-    classLoaderModel.setDependencies(artifactDependencies);
-
-    Path repository = Paths.get(getTempFolder(), REPOSITORY_FOLDER, dependencyFileBuilder.getArtifactFileRepositoryFolderPath());
-    if (repository.toFile().exists()) {
-      repository.toFile().delete();
-    } else {
-      if (!repository.toFile().mkdirs()) {
-        throw new IllegalStateException("Cannot create artifact folder inside repository");
-      }
-    }
-
-    return ContentGenerator.createClassLoaderModelJsonFile(classLoaderModel, repository.toFile());
   }
 
   private File getClassLoaderModelFile() {
@@ -218,8 +150,8 @@ public class ServiceFileBuilder extends AbstractArtifactFileBuilder<ServiceFileB
 
   private org.mule.tools.api.classloader.model.Artifact getArtifact(AbstractDependencyFileBuilder builder) {
     ArtifactCoordinates artifactCoordinates =
-      new ArtifactCoordinates(builder.getGroupId(), builder.getArtifactId(), builder.getVersion(), builder.getType(),
-                              builder.getClassifier());
+        new ArtifactCoordinates(builder.getGroupId(), builder.getArtifactId(), builder.getVersion(), builder.getType(),
+                                builder.getClassifier());
     return new org.mule.tools.api.classloader.model.Artifact(artifactCoordinates, builder.getArtifactFile().toURI());
   }
 

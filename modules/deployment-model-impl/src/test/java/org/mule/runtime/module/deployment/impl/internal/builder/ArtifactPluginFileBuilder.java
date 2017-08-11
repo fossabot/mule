@@ -166,11 +166,6 @@ public class ArtifactPluginFileBuilder extends AbstractArtifactFileBuilder<Artif
   }
 
   @Override
-  protected String getFileExtension() {
-    return ".jar";
-  }
-
-  @Override
   protected Optional<MuleArtifactLoaderDescriptor> getBundleDescriptorLoader() {
     return ofNullable(mulePluginModel != null ? mulePluginModel.getBundleDescriptorLoader() : null);
   }

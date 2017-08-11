@@ -66,7 +66,7 @@ public class FileSystemServiceProviderDiscoverer implements ServiceProviderDisco
   }
 
   private List<ServiceDescriptor> getLegacyServiceDescriptors(ServiceDescriptorFactory serviceDescriptorFactory)
-    throws ServiceResolutionError {
+      throws ServiceResolutionError {
     List<ServiceDescriptor> foundServices = new LinkedList<>();
     for (String serviceFile : getServicesFolder().list(new SuffixFileFilter(".zip"))) {
       final File tempFolder = new File(getServicesTempFolder(), getBaseName(serviceFile));
@@ -83,7 +83,7 @@ public class FileSystemServiceProviderDiscoverer implements ServiceProviderDisco
   }
 
   private List<ServiceDescriptor> getServiceDescriptors(ServiceDescriptorFactory serviceDescriptorFactory)
-    throws ServiceResolutionError {
+      throws ServiceResolutionError {
     List<ServiceDescriptor> foundServices = new LinkedList<>();
     for (String serviceFile : getServicesFolder().list(new SuffixFileFilter(".jar"))) {
       final File tempFolder = new File(getServicesTempFolder(), getBaseName(serviceFile));
