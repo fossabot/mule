@@ -7,6 +7,7 @@
 package org.mule.runtime.core.internal.connection;
 
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.assertNotStopping;
+import static reactor.core.Exceptions.unwrap;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.exception.MuleException;
@@ -58,7 +59,16 @@ final class CachedConnectionHandler<C> implements ConnectionHandlerAdapter<C> {
    */
   @Override
   public C getConnection() throws ConnectionException {
-    return connection.get();
+    try {
+      return connection.get();
+    } catch (Throwable t) {
+      t = unwrap(t);
+      if (t instanceof ConnectionException) {
+        throw (ConnectionException) t;
+      }
+
+      throw new ConnectionException(t.getMessage(), t);
+    }
   }
 
   private C createConnection() throws ConnectionException {

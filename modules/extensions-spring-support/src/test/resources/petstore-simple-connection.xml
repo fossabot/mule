@@ -36,12 +36,6 @@
         </petstore:pets>
     </petstore:config>
 
-    <flow name="getPetsWithInvalidConfigWithConnectionValidation">
-        <petstore:get-pets config-ref="petstoreInvalidConnectionWithConnectionValidation" ownerName="john" />
-        <petstore:get-pets config-ref="petstoreInvalidConnectionWithConnectionValidation" ownerName="john" />
-        <petstore:get-pets config-ref="petstoreInvalidConnectionWithConnectionValidation" ownerName="john" />
-    </flow>
-
     <flow name="getPets">
         <petstore:get-pets config-ref="petstore" ownerName="john" />
     </flow>
