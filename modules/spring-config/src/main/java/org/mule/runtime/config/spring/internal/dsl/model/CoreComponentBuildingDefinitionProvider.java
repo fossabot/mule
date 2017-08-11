@@ -1097,10 +1097,11 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
         .withSetterParameterDefinition("count", fromSimpleParameter("count").build()).build());
 
     buildingDefinitions.add(baseDefinition
-                                .withTypeDefinition(fromType(ReconnectionConfig.class))
-                                .withConstructorParameterDefinition(fromSimpleParameter("failsDeployment").build())
-                                .withConstructorParameterDefinition(fromChildConfiguration(RetryPolicyTemplate.class).build())
-                            .build());
+        .withIdentifier(RECONNECT_ELEMENT_IDENTIFIER)
+        .withTypeDefinition(fromType(ReconnectionConfig.class))
+        .withConstructorParameterDefinition(fromSimpleParameter("failsDeployment").build())
+        .withConstructorParameterDefinition(fromChildConfiguration(RetryPolicyTemplate.class).build())
+        .build());
 
     return buildingDefinitions;
   }

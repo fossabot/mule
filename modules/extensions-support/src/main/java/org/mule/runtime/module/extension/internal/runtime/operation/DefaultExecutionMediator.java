@@ -7,28 +7,26 @@
 package org.mule.runtime.module.extension.internal.runtime.operation;
 
 import static java.lang.String.format;
-import static java.util.Optional.empty;
+import static org.mule.runtime.core.api.execution.TransactionalExecutionTemplate.createTransactionalExecutionTemplate;
 import static org.mule.runtime.core.api.rx.Exceptions.wrapFatal;
 import static org.mule.runtime.core.api.util.ExceptionUtils.extractConnectionException;
-import static org.mule.runtime.core.api.execution.TransactionalExecutionTemplate.createTransactionalExecutionTemplate;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.from;
-
 import org.mule.runtime.api.connection.ConnectionException;
-import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.meta.model.ComponentModel;
 import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.api.meta.model.declaration.fluent.ConfigurationDeclaration;
 import org.mule.runtime.api.meta.model.operation.OperationModel;
 import org.mule.runtime.api.util.Reference;
+import org.mule.runtime.core.api.exception.ErrorTypeRepository;
 import org.mule.runtime.core.api.execution.ExecutionTemplate;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
-import org.mule.runtime.core.api.exception.ErrorTypeRepository;
 import org.mule.runtime.core.internal.connection.ConnectionManagerAdapter;
 import org.mule.runtime.core.internal.connection.ConnectionProviderWrapper;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
+import org.mule.runtime.extension.api.runtime.Interceptable;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationStats;
-import org.mule.runtime.extension.api.runtime.Interceptable;
 import org.mule.runtime.extension.api.runtime.operation.ExecutionContext;
 import org.mule.runtime.extension.api.runtime.operation.Interceptor;
 import org.mule.runtime.extension.api.runtime.operation.OperationExecutor;
@@ -47,7 +45,6 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import reactor.core.publisher.Mono;
 
 /**
@@ -219,19 +216,11 @@ public final class DefaultExecutionMediator implements ExecutionMediator {
         .orElse((ExecutionTemplate<T>) defaultExecutionTemplate);
   }
 
-  // TODO: MULE-10580 - Operation reconnection should be decoupled from config reconnection
   private RetryPolicyTemplate getRetryPolicyTemplate(Optional<ConfigurationInstance> configurationInstance) {
-    Optional<ConnectionProvider> connectionProviderOptional = configurationInstance.map(
-                                                                                        ConfigurationInstance::getConnectionProvider)
-        .orElse(empty());
-
-    if (connectionProviderOptional.isPresent()) {
-      final ConnectionProvider connectionProvider = connectionProviderOptional.get();
-      if (ConnectionProviderWrapper.class.isAssignableFrom(connectionProvider.getClass())) {
-        return ((ConnectionProviderWrapper) connectionProvider).getReconnectionConfig();
-      }
-    }
-    return connectionManager.getDefaultRetryPolicyTemplate();
+    return configurationInstance.flatMap(ConfigurationInstance::getConnectionProvider)
+        .filter(provider -> provider instanceof ConnectionProviderWrapper)
+        .map(connectionProvider -> ((ConnectionProviderWrapper) connectionProvider).getRetryPolicyTemplate())
+        .orElseGet(() -> ReconnectionConfig.getDefault().getRetryPolicyTemplate());
   }
 
   private Optional<MutableConfigurationStats> getMutableConfigurationStats(ExecutionContext<ComponentModel> context) {

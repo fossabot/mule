@@ -75,7 +75,7 @@ public class ConnectionProviderObjectFactory extends AbstractExtensionObjectFact
     } else if (providerModel.getModelProperty(OAuthModelProperty.class).isPresent()) {
       builder = new OAuthConnectionProviderObjectBuilder(providerModel, resolverSet, poolingProfile,
                                                          reconnectionConfig,
-                                                         oauthManager,  extensionModel,
+                                                         oauthManager, extensionModel,
                                                          muleContext);
     } else {
       builder = new DefaultConnectionProviderObjectBuilder(providerModel, resolverSet, poolingProfile,

@@ -69,6 +69,7 @@ import org.mule.runtime.core.internal.message.InternalMessage;
 import org.mule.runtime.core.internal.policy.OperationExecutionFunction;
 import org.mule.runtime.core.internal.policy.OperationPolicy;
 import org.mule.runtime.core.internal.policy.PolicyManager;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
 import org.mule.runtime.extension.api.declaration.type.ExtensionsTypeLoaderFactory;
 import org.mule.runtime.extension.api.metadata.MetadataResolverFactory;
 import org.mule.runtime.extension.api.metadata.NullMetadataResolver;
@@ -271,7 +272,8 @@ public abstract class AbstractOperationMessageProcessorTestCase extends Abstract
     when(configurationModel.getOperationModels()).thenReturn(asList(operationModel));
     when(configurationModel.getOperationModel(OPERATION_NAME)).thenReturn(of(operationModel));
 
-    when(connectionProviderWrapper.getReconnectionConfig()).thenReturn(new NoRetryPolicyTemplate());
+    when(connectionProviderWrapper.getReconnectionConfig()).thenReturn(of(ReconnectionConfig.getDefault()));
+    when(connectionProviderWrapper.getRetryPolicyTemplate()).thenReturn(new NoRetryPolicyTemplate());
 
     mockSubTypes(extensionModel);
     mockClassLoaderModelProperty(extensionModel, getClass().getClassLoader());
@@ -293,7 +295,6 @@ public abstract class AbstractOperationMessageProcessorTestCase extends Abstract
     });
 
     when(connectionManagerAdapter.getConnection(anyString())).thenReturn(null);
-    when(connectionManagerAdapter.getDefaultRetryPolicyTemplate()).thenReturn(new NoRetryPolicyTemplate());
     messageProcessor = setUpOperationMessageProcessor();
   }
 

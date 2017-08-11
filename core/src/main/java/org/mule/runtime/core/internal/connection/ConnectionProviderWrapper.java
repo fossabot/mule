@@ -38,7 +38,8 @@ import org.slf4j.Logger;
  * @param <C> the generic type of the connections that the {@link #delegate} produces
  * @since 4.0
  */
-public abstract class ConnectionProviderWrapper<C> implements ConnectionProvider<C>, HasPoolingProfile, HasReconnectionConfig, Lifecycle {
+public abstract class ConnectionProviderWrapper<C>
+    implements ConnectionProvider<C>, HasPoolingProfile, HasReconnectionConfig, Lifecycle {
 
   private static final Logger LOGGER = getLogger(ConnectionProviderWrapper.class);
 

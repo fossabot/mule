@@ -40,6 +40,7 @@ import org.mule.runtime.core.internal.connection.ConnectionManagerAdapter;
 import org.mule.runtime.core.internal.connection.DefaultConnectionManager;
 import org.mule.runtime.core.internal.connection.ReconnectableConnectionProviderWrapper;
 import org.mule.runtime.core.api.retry.policy.SimpleRetryPolicyTemplate;
+import org.mule.runtime.core.internal.retry.ReconnectionConfig;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.Interceptable;
 import org.mule.runtime.extension.api.runtime.exception.ExceptionHandler;
@@ -87,6 +88,7 @@ public class DefaultExecutionMediatorTestCase extends AbstractMuleContextTestCas
 
   @Mock(extraInterfaces = Interceptable.class)
   private ConfigurationInstance configurationInstance;
+
   @Mock
   private MutableConfigurationStats configurationStats;
 
@@ -147,7 +149,9 @@ public class DefaultExecutionMediatorTestCase extends AbstractMuleContextTestCas
                                             muleContext.getErrorTypeRepository());
 
     final ReconnectableConnectionProviderWrapper<Object> connectionProviderWrapper =
-        new ReconnectableConnectionProviderWrapper<>(null, new SimpleRetryPolicyTemplate(10, RETRY_COUNT));
+        new ReconnectableConnectionProviderWrapper<>(null,
+                                                     new ReconnectionConfig(true,
+                                                                            new SimpleRetryPolicyTemplate(10, RETRY_COUNT)));
     initialiseIfNeeded(connectionProviderWrapper, true, muleContext);
     Optional<ConnectionProvider> connectionProvider = Optional.of(connectionProviderWrapper);
 

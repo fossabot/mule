@@ -10,7 +10,6 @@ import org.mule.runtime.api.config.PoolingProfile;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.lifecycle.Stoppable;
 import org.mule.runtime.core.api.connector.ConnectionManager;
-import org.mule.runtime.core.api.retry.policy.RetryPolicy;
 import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
 
 /**
@@ -21,20 +20,11 @@ import org.mule.runtime.core.api.retry.policy.RetryPolicyTemplate;
 public interface ConnectionManagerAdapter extends ConnectionManager, Stoppable {
 
   /**
-   * When no {@link RetryPolicyTemplate} is specified by the user the {@link ConnectionManagerAdapter} will provide the default
-   * one to create the required {@link RetryPolicy}s instances.
-   *
-   * @return a {@link RetryPolicyTemplate}
-   */
-  RetryPolicyTemplate getDefaultRetryPolicyTemplate();
-
-  /**
    * Returns the {@link RetryPolicyTemplate} that should be applied to the given {@code connectionProvider}
    * @param connectionProvider a {@link ConnectionProvider}
    * @param <C> the generic type of the connection returned by the provider
    * @return a {@link RetryPolicyTemplate}
    */
-  //TODO: MULE-10580 - Operation reconnection should be decoupled from config reconnection
   <C> RetryPolicyTemplate getRetryTemplateFor(ConnectionProvider<C> connectionProvider);
 
   /**
